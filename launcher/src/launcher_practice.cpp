@@ -203,10 +203,15 @@ void Launcher::startPractice()
 	m_practice->setProgram(gameExe());
 	m_practice->setArguments(gameArgs(user, runDir));
 	// boot and menus stay hidden like the online game: the window shows with the loading of the practice battle
+
+#ifdef _WIN32
 	m_practice->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* a) {
 		a->startupInfo->dwFlags |= STARTF_USESHOWWINDOW;
 		a->startupInfo->wShowWindow = SW_HIDE;
 	});
+#else
+	prepareLinuxChild(m_practice);
+#endif
 	m_practiceShown = false;
 	connect(m_practice, &QProcess::finished, this, [this](int code) {
 		if (!m_practice)
@@ -230,7 +235,7 @@ void Launcher::pollPractice()
 {
 	if (!m_practice || !m_practice->processId() || m_practiceShown)
 		return;
-	const DWORD pid = static_cast<DWORD>(m_practice->processId());
+	const quint32 pid = static_cast<quint32>(m_practice->processId());
 	QFile f(m_practiceStatus);
 	QString state, mode;
 	if (f.open(QIODevice::ReadOnly | QIODevice::Text))

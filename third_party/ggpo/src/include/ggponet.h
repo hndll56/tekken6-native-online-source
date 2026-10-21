@@ -13,6 +13,9 @@ extern "C" {
 #endif
 
 #include <stdarg.h>
+#ifndef _WIN32
+#define __cdecl
+#endif
 
 // On windows, export at build time and import at runtime.
 // ELF systems don't need an explicit export/import.

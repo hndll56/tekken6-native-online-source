@@ -1,6 +1,11 @@
 // Tekken 6 netplay - GGPO session (configuration, callbacks, practice pace, battle dump) (split out of t6_netplay.cpp, see the overview there)
 
 #include "t6_netplay_internal.h"
+#include <fstream>
+#ifndef _WIN32
+#include <sys/resource.h>
+#include <rex/input/mmjoystick/sdl_joystick_compat.h>
+#endif
 
 // ---- GGPO session (online plan step 4; port of the PS3 rb_net.cpp) ----
 // Like SF4 Ember: the game runs its offline Versus, the pad reads of both players (XamInputGetState of users 0 / 1) get
@@ -455,6 +460,7 @@ void LogSystemOnce() {
   static bool done = false;
   if (done) return;
   done = true;
+#ifdef _WIN32
   char cpu[49] = {};
   int r[4] = {};
   __cpuid(r, static_cast<int>(0x80000000u));
@@ -478,6 +484,11 @@ void LogSystemOnce() {
               si.dwNumberOfProcessors, ms.ullTotalPhys / 1073741824.0, ms.ullAvailPhys / 1073741824.0, dm.dmPelsWidth,
               dm.dmPelsHeight, dm.dmDisplayFrequency,
               ps.BatteryFlag == 128 || ps.BatteryFlag == 255 ? "no battery" : ps.ACLineStatus == 1 ? "notebook on AC power" : "notebook ON BATTERY");
+#else
+  std::ifstream cpu("/proc/cpuinfo"); std::string line, model="unknown";
+  while(std::getline(cpu,line)) if(line.starts_with("model name")) { model=line.substr(line.find(':')+1); break; }
+  REXLOG_INFO("T6 system: Linux, CPU '{}', {} threads", model, std::thread::hardware_concurrency());
+#endif
 }
 bool StartSession() {
   const NetConfig& c = net_config();
@@ -489,9 +500,15 @@ bool StartSession() {
   // T6_NET_PRIO=1 (experiment): no priority boost for woken threads in this process and the main thread one step
   // above the rest - a worker woken by a semaphore release must not push the main thread off its core.
   if (T6Env("T6_NET_PRIO")) {
+#ifdef _WIN32
     SetProcessPriorityBoost(GetCurrentProcess(), TRUE);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
     REXLOG_INFO("T6 net: priority boost off, main thread above normal");
+#else
+    // Ordinary users cannot request real-time scheduling; preserve pacing without requiring root.
+    errno=0;
+    if(setpriority(PRIO_PROCESS,GetCurrentThreadId(),-1)) REXLOG_WARN("T6 net: priority request denied: {}",strerror(errno));
+#endif
   }
   for (uint32_t& f : g_ring_frame) f = ~0u;
   g_state_rows.clear();
@@ -514,8 +531,10 @@ bool StartSession() {
   cb.advance_frame = cb_advance;
   cb.on_event = cb_event;
   // GGPO expects the application to have started Winsock (RPCS3 did on PS3; without it no socket -> sendto assert)
+#ifdef _WIN32
   WSADATA wsa{};
   if (const int err = WSAStartup(MAKEWORD(2, 2), &wsa); err != 0) REXLOG_ERROR("T6 net: WSAStartup failed: {}", err);
+#endif
   if (!GGPO_SUCCEEDED(ggpo_start_session(&g_ggpo, &cb, const_cast<char*>("tekken6"), 2, kNetInput, c.local_port))) {
     REXLOG_ERROR("T6 net: ggpo_start_session failed");
     NetStatusError(fmt::format("cannot open UDP port {}", c.local_port));
@@ -785,10 +804,14 @@ void LocalLatched(uint8_t* local) {
 // had it), "double" = a second press of the same button / direction before the frame's input went out (merged into one
 // press). Every 10 s: "T6 input diag: ..." in the log; every unseen press with its length.
 void InputDiagThread() {
+#ifdef _WIN32
   using JoyGetPosEx = UINT(WINAPI*)(UINT, LPJOYINFOEX);
   HMODULE mm = LoadLibraryA("winmm.dll");
   const auto get = mm ? reinterpret_cast<JoyGetPosEx>(GetProcAddress(mm, "joyGetPosEx")) : nullptr;
   if (!get) return;
+#else
+  const auto get = joyGetPosEx;
+#endif
   const UINT joy = T6Env("T6_INPUT_DIAG_JOY") ? static_cast<UINT>(T6ToInt(T6Env("T6_INPUT_DIAG_JOY"))) : 0;
   // (Sleep(1) is 1 ms: the netplay pacing already set the timer resolution of the process)
   constexpr int kBits = 36;  // 32 buttons, POV up / right / down / left
@@ -857,6 +880,7 @@ void InputDiagThread() {
 // notes where it is - the recompiled guest function (PPCFuncMappings: nearest host start below the address), else the
 // module (runtime / GPU / system DLL) - separately for live and re-simulated (rollback) frames. Every 30 s the top 30 of
 // each go to the log ("T6 profile"). Nothing is allocated while the thread is stopped (no lock it might hold).
+#ifdef _WIN32
 std::atomic<HANDLE> g_prof_main{nullptr};
 void ProfileThread() {
   std::vector<std::pair<uintptr_t, uint32_t>> fns;  // host start -> guest address
@@ -919,6 +943,8 @@ void ProfileThread() {
     }
   }
 }
+
+#endif
 
 void LocalInput(uint8_t* out) {
   std::memset(out, 0, kNetInput);
@@ -1012,9 +1038,13 @@ uint16_t KeyboardButtons() {
     static const bool global = T6Env("T6_NET_KEYS_GLOBAL") != nullptr;
     bool focus = global;
     if (!focus) {
+#ifdef _WIN32
       DWORD pid = 0;
       if (const HWND fg = GetForegroundWindow()) GetWindowThreadProcessId(fg, &pid);
       focus = pid == GetCurrentProcessId();
+#else
+      focus = T6KeyboardFocused();
+#endif
     }
     {
       if (keys == 3) {
@@ -1046,7 +1076,7 @@ uint16_t KeyboardButtons() {
 // saturated at +0.25 ms = 59.1 fps (T6_PRACTICE_PACE=2 keeps it, tests). Measured (pace_0 / pace_1, 2026-10-14):
 // sound paced 150-167 of 600 periods over 17.5 ms, max ~20 ms; own clock 0 over 17.5 ms, max 16.7, avg 16.67.
 // T6_PRACTICE_PACE=0 = as before. Every 600 frames "T6 practice frames" = periods of the last 600 frames.
-static void PracticePace() {
+void PracticePace() {
   static const bool practice = T6Env("T6_PRACTICE") != nullptr;
   if (!practice || !g_practice_battle) return;
   static const bool on = T6EnvDefaultOn("T6_PRACTICE_PACE");

@@ -1,0 +1,268 @@
+CMake Warning at cmake/rex_version.cmake:33 (message):
+  rex_compute_version: no v* tag reachable from HEAD.  Falling back to
+  0.10.0.0-dev.unknown.  If this is a CI build, ensure tags are fetched
+  (fetch-depth: 0 + fetch-tags: true).  If this is a fork, push tags with:
+  git push <fork-remote> --tags
+Call Stack (most recent call first):
+  cmake/rex_version.cmake:165 (rex_compute_version)
+  CMakeLists.txt:189 (rex_resolve_version)
+
+
+-- xxHash build type: Release
+-- Architecture: x86_64
+-- {fmt} version: 12.1.0
+-- Build type: Release
+-- Build spdlog: 1.17.0
+-- Build type: Release
+-- Generating install
+-- Vulkan stack: SDK 1.4.357.0
+CMake Warning (policy) at thirdparty/sdl3/CMakeLists.txt:1797 (check_c_source_compiles):
+  Policy CMP0219 is not set: Macro invocations preserve backslashes in
+  arguments.  Run "cmake --help-policy CMP0219" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  Command "CHECK_C_SOURCE_COMPILES" called with arguments containing
+  backslashes.
+
+  Since the policy is not set, backslashes in the arguments:
+
+   "    #ifndef __ELF__
+        ELF DL notes is only supported on ELF platforms
+      #endif
+      __attribute__ ((used,aligned(4),section(".note.dlopen"))) static const struct {
+        struct { int a; int b; int c; } hdr; char name[4]; __attribute__((aligned(4))) char json[24];
+      } dlnote = { { 4, 0x407c0c0aU, 16 }, "FDO", "[\\"a\\":{\\"a\\":\\"1\\",\\"b\\":\\"2\\"}]" };
+      int main(int argc, char *argv[]) {
+        return argc + dlnote.hdr.a;
+      }
+      "
+
+  will be interpreted as escape sequences for compatibility.
+
+  Set the policy to NEW to instead pass
+
+   "    #ifndef __ELF__
+        ELF DL notes is only supported on ELF platforms
+      #endif
+      __attribute__ ((used,aligned(4),section(".note.dlopen"))) static const struct {
+        struct { int a; int b; int c; } hdr; char name[4]; __attribute__((aligned(4))) char json[24];
+      } dlnote = { { 4, 0x407c0c0aU, 16 }, "FDO", "[\\\\"a\\\\":{\\\\"a\\\\":\\\\"1\\\\",\\\\"b\\\\":\\\\"2\\\\"}]" };
+      int main(int argc, char *argv[]) {
+        return argc + dlnote.hdr.a;
+      }
+      "
+
+  so that argument parsing will preserve the original values.
+This warning is for project developers.  Use -Wno-author or -Wno-policy to
+suppress it.
+
+-- dynamic libasound -> libasound.so.2
+-- Checking for module 'jack'
+--   Package 'jack', required by 'virtual:world', not found
+-- Checking for module 'libpipewire-0.3>=0.3.44'
+--   Package 'libpipewire-0.3', required by 'virtual:world', not found
+-- dynamic libpulse -> libpulse.so.0
+-- dynamic libsndio -> libsndio.so.7
+-- dynamic libX11 -> libX11.so.6
+-- dynamic libXext -> libXext.so.6
+-- dynamic libXcursor -> libXcursor.so.1
+-- dynamic libXi -> libXi.so.6
+-- dynamic libXfixes -> libXfixes.so.3
+-- dynamic libXrandr -> libXrandr.so.2
+-- dynamic libXrender -> libXrender.so.1
+-- dynamic libXss -> libXss.so.1
+-- dynamic libXtst -> libXtst.so.6
+-- Checking for module 'fribidi'
+--   Package 'fribidi', required by 'virtual:world', not found
+-- Checking for module 'libthai'
+--   Package 'libthai', required by 'virtual:world', not found
+-- dynamic libwayland-client -> libwayland-client.so.0
+-- dynamic libwayland-egl -> libwayland-egl.so.1
+-- dynamic libwayland-cursor -> libwayland-cursor.so.0
+-- dynamic libxkbcommon -> libxkbcommon.so.0
+-- dynamic libdecor-0 -> libdecor-0.so.0
+-- Checking for one of the modules 'liburing-ffi'
+-- Checking for modules 'libunwind;libunwind-generic'
+--   Package 'libunwind', required by 'virtual:world', not found
+--   Package 'libunwind-generic', required by 'virtual:world', not found
+-- Checking for module 'libusb-1.0>=1.0.16'
+--   Package 'libusb-1.0', required by 'virtual:world', not found
+-- Could NOT find LibUSB (missing: LibUSB_LIBRARY LibUSB_INCLUDE_PATH) (found version "LibUSB_VERSION-NOTFOUND")
+-- 
+-- SDL3 was configured with the following options:
+-- 
+-- Platform: Linux-6.18.55
+-- 64-bit:   TRUE
+-- Compiler: /workspace/scratch/9c93eb85c86f/deps/usr/lib/llvm-20/bin/clang
+-- Revision: SDL-3.5.0-8bf3b72
+-- Vendor:   
+-- 
+-- Subsystems:
+--   Audio:    ON
+--   Video:    ON
+--   GPU:      ON
+--   Render:   OFF
+--   Camera:   OFF
+--   Joystick: ON
+--   Haptic:   OFF
+--   Hidapi:   ON
+--   Power:    OFF
+--   Sensor:   OFF
+--   Dialog:   ON
+--   Tray:     OFF
+-- 
+-- Options:
+--   SDL_ALSA                    (Wanted: ON): ON
+--   SDL_ALSA_SHARED             (Wanted: ON): ON
+--   SDL_ALTIVEC                 (Wanted: OFF): OFF
+--   SDL_ARMNEON                 (Wanted: OFF): OFF
+--   SDL_ASAN                    (Wanted: OFF): OFF
+--   SDL_ASSEMBLY                (Wanted: ON): ON
+--   SDL_ASSERTIONS              (Wanted: auto): auto
+--   SDL_AVX                     (Wanted: ON): ON
+--   SDL_AVX2                    (Wanted: ON): ON
+--   SDL_AVX512F                 (Wanted: ON): ON
+--   SDL_BACKGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_CCACHE                  (Wanted: OFF): OFF
+--   SDL_CLANG_TIDY              (Wanted: OFF): OFF
+--   SDL_CLOCK_GETTIME           (Wanted: ON): ON
+--   SDL_COCOA                   (Wanted: OFF): OFF
+--   SDL_DBUS                    (Wanted: ON): ON
+--   SDL_DEPS_SHARED             (Wanted: ON): OFF
+--   SDL_DIRECTX                 (Wanted: OFF): OFF
+--   SDL_DISKAUDIO               (Wanted: OFF): OFF
+--   SDL_DLOPEN_NOTES            (Wanted: ON): ON
+--   SDL_DUMMYAUDIO              (Wanted: OFF): OFF
+--   SDL_DUMMYCAMERA             (Wanted: OFF): OFF
+--   SDL_DUMMYVIDEO              (Wanted: OFF): OFF
+--   SDL_EXAMPLES                (Wanted: OFF): OFF
+--   SDL_EXAMPLES_LINK_SHARED    (Wanted: OFF): OFF
+--   SDL_FOREGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_FRIBIDI                 (Wanted: ON): OFF
+--   SDL_FRIBIDI_SHARED          (Wanted: ON): OFF
+--   SDL_GCC_ATOMICS             (Wanted: ON): ON
+--   SDL_GPU_OPENXR              (Wanted: ON): ON
+--   SDL_HIDAPI                  (Wanted: ON): ON
+--   SDL_HIDAPI_JOYSTICK         (Wanted: ON): ON
+--   SDL_HIDAPI_LIBUSB           (Wanted: ON): OFF
+--   SDL_HIDAPI_LIBUSB_SHARED    (Wanted: ON): OFF
+--   SDL_IBUS                    (Wanted: ON): ON
+--   SDL_INSTALL                 (Wanted: ON): OFF
+--   SDL_INSTALL_TESTS           (Wanted: OFF): OFF
+--   SDL_JACK                    (Wanted: ON): OFF
+--   SDL_JACK_SHARED             (Wanted: ON): OFF
+--   SDL_KMSDRM                  (Wanted: ON): OFF
+--   SDL_KMSDRM_SHARED           (Wanted: ON): OFF
+--   SDL_LASX                    (Wanted: OFF): OFF
+--   SDL_LIBC                    (Wanted: ON): ON
+--   SDL_LIBICONV                (Wanted: OFF): OFF
+--   SDL_LIBTHAI                 (Wanted: ON): OFF
+--   SDL_LIBTHAI_SHARED          (Wanted: ON): OFF
+--   SDL_LIBUDEV                 (Wanted: ON): OFF
+--   SDL_LIBURING                (Wanted: ON): OFF
+--   SDL_LSX                     (Wanted: OFF): OFF
+--   SDL_METAL                   (Wanted: OFF): OFF
+--   SDL_MMX                     (Wanted: ON): ON
+--   SDL_OFFSCREEN               (Wanted: ON): ON
+--   SDL_OPENGL                  (Wanted: OFF): OFF
+--   SDL_OPENGLES                (Wanted: OFF): OFF
+--   SDL_OPENVR                  (Wanted: OFF): OFF
+--   SDL_OSS                     (Wanted: OFF): OFF
+--   SDL_PIPEWIRE                (Wanted: ON): OFF
+--   SDL_PIPEWIRE_SHARED         (Wanted: ON): OFF
+--   SDL_PTHREADS                (Wanted: ON): ON
+--   SDL_PTHREADS_SEM            (Wanted: ON): ON
+--   SDL_PULSEAUDIO              (Wanted: ON): ON
+--   SDL_PULSEAUDIO_SHARED       (Wanted: ON): ON
+--   SDL_RENDER_D3D              (Wanted: OFF): OFF
+--   SDL_RENDER_D3D11            (Wanted: OFF): OFF
+--   SDL_RENDER_D3D12            (Wanted: OFF): OFF
+--   SDL_RENDER_GPU              (Wanted: OFF): OFF
+--   SDL_RENDER_METAL            (Wanted: OFF): OFF
+--   SDL_RENDER_VULKAN           (Wanted: OFF): OFF
+--   SDL_ROCKCHIP                (Wanted: OFF): OFF
+--   SDL_RPATH                   (Wanted: ON): OFF
+--   SDL_RPI                     (Wanted: OFF): OFF
+--   SDL_SNDIO                   (Wanted: ON): ON
+--   SDL_SNDIO_SHARED            (Wanted: ON): ON
+--   SDL_SSE                     (Wanted: ON): ON
+--   SDL_SSE2                    (Wanted: ON): ON
+--   SDL_SSE3                    (Wanted: ON): ON
+--   SDL_SSE4_1                  (Wanted: ON): ON
+--   SDL_SSE4_2                  (Wanted: ON): ON
+--   SDL_SYSTEM_ICONV            (Wanted: ON): ON
+--   SDL_TESTS                   (Wanted: OFF): OFF
+--   SDL_TESTS_LINK_SHARED       (Wanted: OFF): OFF
+--   SDL_UNINSTALL               (Wanted: OFF): OFF
+--   SDL_VIRTUAL_JOYSTICK        (Wanted: ON): ON
+--   SDL_VIVANTE                 (Wanted: OFF): OFF
+--   SDL_VULKAN                  (Wanted: ON): ON
+--   SDL_WASAPI                  (Wanted: OFF): OFF
+--   SDL_WAYLAND                 (Wanted: ON): ON
+--   SDL_WAYLAND_LIBDECOR        (Wanted: ON): ON
+--   SDL_WAYLAND_LIBDECOR_SHARED (Wanted: ON): ON
+--   SDL_WAYLAND_SHARED          (Wanted: ON): ON
+--   SDL_X11                     (Wanted: ON): ON
+--   SDL_X11_SHARED              (Wanted: ON): ON
+--   SDL_X11_XCURSOR             (Wanted: ON): ON
+--   SDL_X11_XDBE                (Wanted: ON): ON
+--   SDL_X11_XFIXES              (Wanted: ON): ON
+--   SDL_X11_XINPUT              (Wanted: ON): ON
+--   SDL_X11_XRANDR              (Wanted: ON): ON
+--   SDL_X11_XSCRNSAVER          (Wanted: ON): ON
+--   SDL_X11_XSHAPE              (Wanted: ON): ON
+--   SDL_X11_XSYNC               (Wanted: ON): ON
+--   SDL_X11_XTEST               (Wanted: ON): ON
+--   SDL_XINPUT                  (Wanted: OFF): OFF
+-- 
+--  Build Shared Library: OFF
+--  Build Static Library: ON
+-- 
+-- Enabled backends:
+--   Video drivers: offscreen wayland(dynamic) x11(dynamic)
+--   X11 libraries: xcursor xdbe xfixes xinput2 xrandr xscrnsaver xshape xsync xtest
+--   Render drivers: 
+--   GPU drivers: openxr vulkan
+--   Audio drivers: alsa(dynamic) pulseaudio(dynamic) sndio(dynamic)
+--   Joystick drivers: hidapi linux virtual
+--   Camera drivers: dummy
+-- 
+-- If something was not detected, although the libraries
+-- were installed, then make sure you have set the
+-- CMAKE_C_FLAGS and CMAKE_PREFIX_PATH CMake variables correctly.
+-- 
+CMake Warning (deprecated) at thirdparty/glslang/CMakeLists.txt:39 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+CMake Warning (policy) at thirdparty/glslang/CMakeLists.txt:233 (find_package):
+  Policy CMP0148 is not set: The FindPythonInterp and FindPythonLibs modules
+  are removed.  Run "cmake --help-policy CMP0148" for policy details.  Use
+  the cmake_policy command to set the policy and suppress this warning.
+Call Stack (most recent call first):
+  thirdparty/glslang/CMakeLists.txt:239 (find_host_package)
+This warning is for project developers.  Use -Wno-author or -Wno-policy to
+suppress it.
+
+-- ===========================================
+-- ReXGlue Configuration Summary:
+--   Version: 0.10.0.0-dev.unknown (dev)
+--   Platform: linux-amd64
+--   Compiler: Clang 20.1.2
+--   Configurations: 
+--   Output Dir: /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/out/linux-amd64
+--   C++ Standard: C++23
+--   Graphics: D3D12=OFF Vulkan=ON
+--   FidelityFX: OFF
+--   Tracy: OFF
+--   Perf Counters: ON
+-- ===========================================
+-- Configuring done (0.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /workspace/scratch/9c93eb85c86f/tekken6-linux/build/sdk-linux

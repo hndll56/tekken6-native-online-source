@@ -1,0 +1,19 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "linux-components",
+      "displayName": "Linux launcher, GGPO, ISO tool and tests (no game data needed)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/components",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "T6_BUILD_GAME": "OFF",
+        "T6_BUILD_LAUNCHER": "ON",
+        "BUILD_TESTING": "ON"
+      }
+    }
+  ],
+  "buildPresets": [{"name": "linux-components", "configurePreset": "linux-components", "jobs": 2}],
+  "testPresets": [{"name": "linux-components", "configurePreset": "linux-components", "output": {"outputOnFailure": true}}]
+}

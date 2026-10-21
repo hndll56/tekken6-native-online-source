@@ -21,3 +21,6 @@ QStringList filesUnder(const QString& dir);
 QString buildHash();
 bool freshProfile(const QString& to);
 void addShaderCache(const QString& runDir);
+
+// Per-instance shader cache (XDG cache directory on Linux).
+QString gameCacheRoot(const QString& runDir);

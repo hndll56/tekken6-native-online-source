@@ -1,4 +1,5 @@
 #pragma once
+#include "t6_host.h"
 // Helpers shared by the Tekken 6 sources (t6_netplay.cpp, t6_status.cpp, t6_watch.cpp): guest memory reads, the
 // runtime's exported functions, game state fields used in several places, small parsers and the status file writer.
 // (Code review 2026-10-18: the same lookups / reads / parsers were copied into dozens of places.)
@@ -19,8 +20,6 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <winsock2.h>  // (before windows.h: t6_netplay.cpp uses Winsock)
-#include <windows.h>
 
 extern uint8_t* g_t6_membase;  // t6_netplay.cpp: guest memory base
 extern bool (*g_t6_gpu_idle)();  // t6_netplay.cpp, set by Tekken6App: the GPU executed all submitted commands

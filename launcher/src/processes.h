@@ -2,6 +2,17 @@
 // Tekken 6 Native Online launcher - Game processes: ended together with the launcher, leftovers of an earlier launcher.
 
 #include "common.h"
+#ifndef _WIN32
+#include <sys/prctl.h>
+#include <signal.h>
+#include <unistd.h>
+inline void prepareLinuxChild(QProcess* p) {
+    const pid_t parent = getpid();
+    p->setChildProcessModifier([parent] {
+        if (prctl(PR_SET_PDEATHSIG, SIGKILL) != 0 || getppid() != parent) _exit(127);
+    });
+}
+#endif
 
 void endWithLauncher(qint64 pid);
 

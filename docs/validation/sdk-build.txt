@@ -1,0 +1,181 @@
+[0/2] Re-checking globbed directories...
+[1/3] Building CXX object src/graphics/CMakeFiles/rexgpu-xenos.dir/vulkan/command_processor.cpp.o
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:37:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:21:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/render_target/cache.h:187:9: warning: field 'draw_extent_estimator_' will be initialized after field 'draw_resolution_scale_x_' [-Wreorder-ctor]
+  187 |         draw_extent_estimator_(register_file, memory),
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         draw_resolution_scale_x_(draw_resolution_scale_x)
+  188 |         draw_resolution_scale_x_(draw_resolution_scale_x),
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         draw_resolution_scale_y_(draw_resolution_scale_y)
+  189 |         draw_resolution_scale_y_(draw_resolution_scale_y) {
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         draw_extent_estimator_(register_file, memory)
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:37:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:23:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/texture_cache.h:19:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:167:53: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'rex::graphics::TextureCache::TextureKey' [-Wnontrivial-memcall]
+  167 |     TextureKey(const TextureKey& key) { std::memcpy(this, &key, sizeof(*this)); }
+      |                                                     ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:167:53: note: explicitly cast the pointer to silence this warning
+  167 |     TextureKey(const TextureKey& key) { std::memcpy(this, &key, sizeof(*this)); }
+      |                                                     ^
+      |                                                     (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:169:19: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'rex::graphics::TextureCache::TextureKey' [-Wnontrivial-memcall]
+  169 |       std::memcpy(this, &key, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:169:19: note: explicitly cast the pointer to silence this warning
+  169 |       std::memcpy(this, &key, sizeof(*this));
+      |                   ^
+      |                   (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:174:19: warning: first argument in call to 'memset' is a pointer to non-trivially copyable type 'rex::graphics::TextureCache::TextureKey' [-Wnontrivial-memcall]
+  174 |       std::memset(this, 0, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:174:19: note: explicitly cast the pointer to silence this warning
+  174 |       std::memset(this, 0, sizeof(*this));
+      |                   ^
+      |                   (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:223:70: warning: unused parameter 'global_lock' [-Wunused-parameter]
+  223 |     bool base_outdated(const std::unique_lock<std::recursive_mutex>& global_lock) const {
+      |                                                                      ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:226:70: warning: unused parameter 'global_lock' [-Wunused-parameter]
+  226 |     bool mips_outdated(const std::unique_lock<std::recursive_mutex>& global_lock) const {
+      |                                                                      ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:469:19: warning: first argument in call to 'memset' is a pointer to non-trivially copyable type 'rex::graphics::TextureCache::TextureBinding' [-Wnontrivial-memcall]
+  469 |       std::memset(this, 0, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/texture/cache.h:469:19: note: explicitly cast the pointer to silence this warning
+  469 |       std::memset(this, 0, sizeof(*this));
+      |                   ^
+      |                   (void*)
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:37:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:23:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/texture_cache.h:20:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/shader.h:15:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/pipeline/shader/spirv.h:48:3: warning: 'const' type qualifier on return type has no effect [-Wignored-qualifiers]
+   48 |   const uint32_t GetUsedTextureMaskAfterTranslation() const { return used_texture_mask_; }
+      |   ^~~~~
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:37:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:23:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/texture_cache.h:73:12: warning: moving a local object in a return statement prevents copy elision [-Wpessimizing-move]
+   73 |     return std::move(texture_cache);
+      |            ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/texture_cache.h:73:12: note: remove std::move call here
+   73 |     return std::move(texture_cache);
+      |            ^~~~~~~~~~             ~
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:37:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:406:61: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'rex::graphics::vulkan::VulkanRenderTargetCache::FramebufferKey' [-Wnontrivial-memcall]
+  406 |     FramebufferKey(const FramebufferKey& key) { std::memcpy(this, &key, sizeof(*this)); }
+      |                                                             ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:406:61: note: explicitly cast the pointer to silence this warning
+  406 |     FramebufferKey(const FramebufferKey& key) { std::memcpy(this, &key, sizeof(*this)); }
+      |                                                             ^
+      |                                                             (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:408:19: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'rex::graphics::vulkan::VulkanRenderTargetCache::FramebufferKey' [-Wnontrivial-memcall]
+  408 |       std::memcpy(this, &key, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:408:19: note: explicitly cast the pointer to silence this warning
+  408 |       std::memcpy(this, &key, sizeof(*this));
+      |                   ^
+      |                   (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:415:32: warning: first argument in call to 'memset' is a pointer to non-trivially copyable type 'rex::graphics::vulkan::VulkanRenderTargetCache::FramebufferKey' [-Wnontrivial-memcall]
+  415 |     void Reset() { std::memset(this, 0, sizeof(*this)); }
+      |                                ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/render_target_cache.h:415:32: note: explicitly cast the pointer to silence this warning
+  415 |     void Reset() { std::memset(this, 0, sizeof(*this)); }
+      |                                ^
+      |                                (void*)
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:209:19: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'rex::graphics::vulkan::VulkanPipelineCache::PipelineDescription' [-Wnontrivial-memcall]
+  209 |       std::memcpy(this, &description, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:209:19: note: explicitly cast the pointer to silence this warning
+  209 |       std::memcpy(this, &description, sizeof(*this));
+      |                   ^
+      |                   (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/platform.h:130:66: note: expanded from macro 'REXPACKEDSTRUCT'
+  130 | #define REXPACKEDSTRUCT(name, value) _REXPACKEDSCOPE(struct name value)
+      |                                                                  ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/platform.h:126:28: note: expanded from macro '_REXPACKEDSCOPE'
+  126 |   _Pragma("pack(push, 1)") body; \
+      |                            ^
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:212:19: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'rex::graphics::vulkan::VulkanPipelineCache::PipelineDescription' [-Wnontrivial-memcall]
+  212 |       std::memcpy(this, &description, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:212:19: note: explicitly cast the pointer to silence this warning
+  212 |       std::memcpy(this, &description, sizeof(*this));
+      |                   ^
+      |                   (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/platform.h:130:66: note: expanded from macro 'REXPACKEDSTRUCT'
+  130 | #define REXPACKEDSTRUCT(name, value) _REXPACKEDSCOPE(struct name value)
+      |                                                                  ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/platform.h:126:28: note: expanded from macro '_REXPACKEDSCOPE'
+  126 |   _Pragma("pack(push, 1)") body; \
+      |                            ^
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:32:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:219:19: warning: first argument in call to 'memset' is a pointer to non-trivially copyable type 'rex::graphics::vulkan::VulkanPipelineCache::PipelineDescription' [-Wnontrivial-memcall]
+  219 |       std::memset(this, 0, sizeof(*this));
+      |                   ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/pipeline_cache.h:219:19: note: explicitly cast the pointer to silence this warning
+  219 |       std::memset(this, 0, sizeof(*this));
+      |                   ^
+      |                   (void*)
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/platform.h:130:66: note: expanded from macro 'REXPACKEDSTRUCT'
+  130 | #define REXPACKEDSTRUCT(name, value) _REXPACKEDSCOPE(struct name value)
+      |                                                                  ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/platform.h:126:28: note: expanded from macro '_REXPACKEDSCOPE'
+  126 |   _Pragma("pack(push, 1)") body; \
+      |                            ^
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:41:
+In file included from /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/graphics/vulkan/command_processor.h:42:
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/ui/vulkan/presenter.h:164:14: warning: moving a local object in a return statement prevents copy elision [-Wpessimizing-move]
+  164 |       return std::move(image);
+      |              ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/include/rex/ui/vulkan/presenter.h:164:14: note: remove std::move call here
+  164 |       return std::move(image);
+      |              ^~~~~~~~~~     ~
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:3668:84: warning: unused parameter 'guest_address' [-Wunused-parameter]
+ 3668 | Shader* VulkanCommandProcessor::LoadShader(xenos::ShaderType shader_type, uint32_t guest_address,
+      |                                                                                    ^
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:6731:77: warning: '&&' within '||' [-Wlogical-op-parentheses]
+ 6731 |         (color_info.color_format == xenos::ColorRenderTargetFormat::k_16_16 &&
+      |          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+ 6732 |              !render_target_cache_->IsFixedRG16TruncatedToMinus1To1() ||
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:6731:77: note: place parentheses around the '&&' expression to silence this warning
+ 6731 |         (color_info.color_format == xenos::ColorRenderTargetFormat::k_16_16 &&
+      |                                                                             ^
+      |          (
+ 6732 |              !render_target_cache_->IsFixedRG16TruncatedToMinus1To1() ||
+      |                                                                      )
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:6733:83: warning: '&&' within '||' [-Wlogical-op-parentheses]
+ 6732 |              !render_target_cache_->IsFixedRG16TruncatedToMinus1To1() ||
+      |                                                                       ~~
+ 6733 |          color_info.color_format == xenos::ColorRenderTargetFormat::k_16_16_16_16 &&
+      |          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+ 6734 |              !render_target_cache_->IsFixedRGBA16TruncatedToMinus1To1())) {
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/src/graphics/vulkan/command_processor.cpp:6733:83: note: place parentheses around the '&&' expression to silence this warning
+ 6733 |          color_info.color_format == xenos::ColorRenderTargetFormat::k_16_16_16_16 &&
+      |                                                                                   ^
+      |          (
+ 6734 |              !render_target_cache_->IsFixedRGBA16TruncatedToMinus1To1())) {
+      |                                                                        
+      |                                                                        )
+19 warnings generated.
+[2/3] Linking CXX shared library /workspace/scratch/9c93eb85c86f/tekken6-linux/third_party/rexglue-sdk/out/linux-amd64/librexgpu-xenos.so

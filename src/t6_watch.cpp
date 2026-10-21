@@ -1,6 +1,7 @@
 // Tekken 6 game hooks - store / address watch, pad step counter, Mokujin style watch, menu save dump (split out of t6_watch.cpp)
 
 #include "t6_watch_internal.h"
+#include "t6_fault_linux.h"
 
 extern "C" int t6_watch_on = 0;
 extern "C" int t6_rwatch_on = 0;  // T6_RWATCH=1: loads of the T6_WATCH values are logged too
@@ -129,6 +130,9 @@ extern "C" void sub_82268A60(PPCContext& ctx, uint8_t* base) {
 // accesses to those 4 bytes in the session frames a..b, by guest function (the custom watch above); every pad step
 // T6_CW_STEPS=<a>,<b> instead: pad steps a..b (also before the session); T6_CW_LEN = bytes watched (default 4)
 void T6CwTick(uint8_t* base) {
+#ifndef _WIN32
+  T6FlushLinuxResearch();
+#endif
   static const char* cw = T6Env("T6_CW_ADDR");
   static const char* st = T6Env("T6_CW_STEPS");
   if (!cw || !*cw || (!st && !T6NetRunning())) return;

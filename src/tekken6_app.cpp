@@ -1,7 +1,12 @@
 // Tekken 6 - the ReXGlue app of the game: member functions of tekken6_app.h
 
-#include "generated/default/tekken6_init.h"
+#include <rex/image_info.h>
+extern const rex::PPCImageInfo PPCImageConfig;
 #include "tekken6_app.h"
+#include "t6_fault_linux.h"
+#ifndef _WIN32
+#include <SDL3/SDL.h>
+#endif
 
 void T6FrameDataDialog::OnDraw(ImGuiIO& io) {
   const uint32_t now = GetTickCount();
@@ -41,6 +46,11 @@ void T6FrameDataDialog::OnDraw(ImGuiIO& io) {
 }
 
 Tekken6App::~Tekken6App() {
+#ifndef _WIN32
+  linux_window_alive_->store(false);
+  linux_window_thread_.request_stop();
+  if(linux_window_thread_.joinable()) linux_window_thread_.join();
+#endif
   capture_stop_.store(true);
   if (capture_thread_.joinable()) {
     capture_thread_.join();
@@ -53,6 +63,9 @@ Tekken6App::~Tekken6App() {
 }
 
 std::unique_ptr<rex::ui::WindowedApp> Tekken6App::Create(rex::ui::WindowedAppContext& ctx) {
+#ifndef _WIN32
+  T6InitLinuxInput();
+#endif
   return std::unique_ptr<Tekken6App>(new Tekken6App(ctx, "tekken6",
                                                       PPCImageConfig));
 }
@@ -100,7 +113,11 @@ void Tekken6App::OnPreSetup(rex::RuntimeConfig& config) {
   }
   // Started without arguments (double click on tekken6.exe = offline play): the render target path the launcher
   // passes - the SDK's default ("" = rtv) draws nothing with this game (black screen, practice test 2026-10-12).
+#ifdef _WIN32
   if (rex::cvar::GetFlagByName("render_target_path_d3d12").empty()) rex::cvar::SetFlagByName("render_target_path_d3d12", "rov");
+#else
+  if (rex::cvar::GetFlagByName("render_target_path_vulkan").empty()) rex::cvar::SetFlagByName("render_target_path_vulkan", "auto");
+#endif
   REXLOG_INFO("Tekken6 RexGlue prototype: Xenos GPU plugin requested");
 }
 
@@ -660,6 +677,35 @@ void Tekken6App::OnPostLoadXexImage() {
 }
 
 void Tekken6App::OnPostLaunchModule(rex::system::XThread* thread) {
+#ifndef _WIN32
+  T6InstallLinuxFaults();
+  const auto alive = linux_window_alive_;
+  linux_window_thread_ = std::jthread([this, alive](std::stop_token stop) {
+    const char* home=T6Env("T6_HOME");
+    if(!home) return;
+    const std::filesystem::path control=std::filesystem::path(home)/"runs"/("window_"+std::to_string(getpid())+".txt");
+    std::string last;
+    while(!stop.stop_requested()) {
+      std::ifstream input(control); std::string request; std::getline(input,request);
+      if(!request.empty() && request!=last) {
+        last=request;
+        app_context().CallInUIThread([this,alive,request] {
+          if(!alive->load()) return;
+          int count=0; SDL_Window** windows=SDL_GetWindows(&count);
+          for(int i=0;i<count;++i) if(auto* w=windows[i]) {
+            if(request=="hide") SDL_HideWindow(w);
+            else {
+              SDL_SetWindowFullscreen(w,request=="fullscreen"); SDL_ShowWindow(w);
+              if(!T6Env("T6_LAUNCHER_NOFOCUS")) SDL_RaiseWindow(w);
+            }
+          }
+          SDL_free(windows);
+        });
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+  });
+#endif
   rex::ReXApp::OnPostLaunchModule(thread);
   if (frame_data_drawer_) {  // (OnCreateDialogs: the frame data on top of the guest output, painted by its thread)
     auto* graphics = runtime() ? runtime()->graphics_system() : nullptr;

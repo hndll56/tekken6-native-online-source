@@ -7,6 +7,9 @@
 
 #include "types.h"
 #include "poll.h"
+#ifndef _WIN32
+#include <sys/poll.h>
+#endif
 
 Poll::Poll(void) :
    _handle_count(0),
@@ -15,7 +18,9 @@ Poll::Poll(void) :
    /*
     * Create a dummy handle to simplify things.
     */
+#ifdef _WIN32
    _handles[_handle_count++] = CreateEvent(NULL, true, false, NULL);
+#endif
 }
 
 void
@@ -68,11 +73,19 @@ Poll::Pump(int timeout)
       timeout = MIN(timeout, maxwait);
    }
 
+#ifdef _WIN32
    res = WaitForMultipleObjects(_handle_count, _handles, false, timeout);
    if (res >= WAIT_OBJECT_0 && res < WAIT_OBJECT_0 + _handle_count) {
       i = res - WAIT_OBJECT_0;
       finished = !_handle_sinks[i].sink->OnHandlePoll(_handle_sinks[i].cookie) || finished;
    }
+#else
+   pollfd descriptors[MAX_POLLABLE_HANDLES]{};
+   for (i = 0; i < _handle_count; ++i) descriptors[i] = {_handles[i], POLLIN, 0};
+   do { res = poll(descriptors, _handle_count, timeout); } while (res < 0 && errno == EINTR);
+   for (i = 0; res > 0 && i < _handle_count; ++i)
+      if (descriptors[i].revents) finished = !_handle_sinks[i].sink->OnHandlePoll(_handle_sinks[i].cookie) || finished;
+#endif
    for (i = 0; i < _msg_sinks.size(); i++) {
       PollSinkCb &cb = _msg_sinks[i];
       finished = !cb.sink->OnMsgPoll(cb.cookie) || finished;

@@ -103,7 +103,7 @@ void PollCommand() {
   if (!path || !*path) return;
   // T6_TEST_PARK_LATE=<ms> (tests): this game takes its 'park' command that much later than it arrived = the peer
   // closes the session first and this side waits for his input (t6_netplay.cpp takes the command in that wait)
-  static ULONGLONG park_at = 0;
+  static uint64_t park_at = 0;
   if (park_at && GetTickCount64() >= park_at) {
     park_at = 0;
     REXLOG_INFO("T6 status: park command from the launcher (late, test)");
@@ -211,8 +211,8 @@ extern "C" void sub_822CD6F8(PPCContext& ctx, uint8_t* base) {
     WriteStatus();
     DumpMatchInfo(mode);
   }
-  static ULONGLONG next_poll = 0;
-  if (const ULONGLONG now = GetTickCount64(); now >= next_poll) {
+  static uint64_t next_poll = 0;
+  if (const uint64_t now = GetTickCount64(); now >= next_poll) {
     next_poll = now + 250;
     PollCommand();
   }

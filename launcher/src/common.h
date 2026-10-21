@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include <QtNetwork>
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -13,13 +14,36 @@
 #include <mmsystem.h>
 #include <dbghelp.h>
 #include <tlhelp32.h>
+#else
+#include "linux_input.h"
+#endif
 #include <algorithm>
 #include <cmath>
 #include <atomic>
 #include <functional>
 #include <mutex>
 #include <thread>
+#ifdef _WIN32
+using SocketLength = int;
+#else
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+using SocketLength = socklen_t;
+using SOCKET = int;
+constexpr int INVALID_SOCKET = -1;
+inline int closesocket(int s) { return close(s); }
+#endif
 
+#ifdef _WIN32
+#define T6_NATIVE_EXE "native/tekken6.exe"
+#define T6_BUILD_EXE "build/tekken6.exe"
+#define T6_GAME_EXE "tekken6.exe"
+#else
+#define T6_NATIVE_EXE "native/tekken6"
+#define T6_BUILD_EXE "build/linux-game/tekken6"
+#define T6_GAME_EXE "tekken6"
+#endif
 inline const char* const kVersion = "2.3.0";  // v2.0.1: start-of-match save stall, rematch card + same stage, loser's random stage (ranked), blur / vibration options
 // The lobby server and the release repository of the official build (CMake T6_SERVER / T6_RELEASE_API, set by the
 // untracked launcher/official.cmake); T6_LOBBY_SERVER / T6_UPDATE_API override them for local tests
@@ -37,7 +61,11 @@ inline constexpr int kHistoryMax = 100;  // own match history (user 2026-10-18: 
 
 // releases of the package (GitHub; /releases/latest skips pre-releases); empty = no update check
 inline const wchar_t* const kReleaseApi = T6_RELEASE_API;
+#ifdef _WIN32
 inline const char* const kPatchAsset = "tekken6_native_online_patch.zip";
+#else
+inline const char* const kPatchAsset = "tekken6_native_online_linux_x86_64_patch.zip";
+#endif
 inline bool g_updateTest = false;
 
 inline std::atomic<int> g_updateWorkerFailures{0};  // (update downloads ended by an exception: the button stays)

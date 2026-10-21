@@ -246,7 +246,11 @@ void Launcher::finishUpdate(const QByteArray& zip, QString error)
 	}
 	if (error.isEmpty())
 	{
+#ifdef _WIN32
 		const QString tar = QDir(qEnvironmentVariable("SystemRoot", "C:/Windows")).filePath("System32/tar.exe");
+#else
+        const QString tar = QStandardPaths::findExecutable("bsdtar");
+#endif
 		if (QProcess::execute(tar, {"-xf", QDir::toNativeSeparators(tmp + "/patch.zip"), "-C", QDir::toNativeSeparators(tmp + "/files")}) != 0)
 			error = T("Extracting the update failed.");
 	}

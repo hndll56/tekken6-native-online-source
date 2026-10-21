@@ -1,0 +1,2 @@
+SDK patch series: already applied
+0002-ffmpeg-mingw.patch: already applied

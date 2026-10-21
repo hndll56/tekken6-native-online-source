@@ -1,7 +1,7 @@
 // Tekken 6 netplay - declarations shared by the t6_*.cpp modules (split of t6_netplay.cpp)
 #pragma once
+#include "t6_host.h"
 
-#include <intrin.h>
 #include <ggponet.h>
 #include "t6_common.h"
 #include <rex/cvar.h>
@@ -34,9 +34,6 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <winsock2.h>
-#include <windows.h>
-#include <mmsystem.h>
 
 void T6KeepMoney(uint8_t* base);  // t6_watch.cpp (T6_MONEY)
 void T6WatchSave(uint8_t* base);  // t6_watch.cpp (T6_WATCH_SAVE)
@@ -268,6 +265,9 @@ struct State;
 struct SnapTest;
 
 // ---- shared state and helpers of the modules
+#ifndef _WIN32
+HANDLE T6LinuxProfileTarget();
+#endif
 extern std::atomic<HANDLE> g_prof_main;  // t6_session.cpp (T6_PROFILE)
 void ProfileThread();  // t6_session.cpp
 void CalibrateFromMap(std::vector<Range>& ranges, std::vector<Range>& exclude, bool with_exclude = true);  // t6_snap_calibrate.cpp

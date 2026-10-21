@@ -1,0 +1,5 @@
+0001-tekken6-sdk-changes.patch: applied
+0003-linux-host.patch: applied
+0002-ffmpeg-mingw.patch: applied
+SDK patch series: already applied
+0002-ffmpeg-mingw.patch: already applied

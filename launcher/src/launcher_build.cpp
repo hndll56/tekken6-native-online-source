@@ -10,7 +10,7 @@ bool Launcher::gameBuilt() const
 
 bool Launcher::rebuildNeeded() const
 {
-	return QFile::exists(rootFile("native/tekken6.exe")) && gameNeed() == GameBuild;
+	return QFile::exists(rootFile(T6_NATIVE_EXE)) && gameNeed() == GameBuild;
 }
 
 // the game is usable for a match only when it is up to date (both players need the same exe)
@@ -66,6 +66,9 @@ void Launcher::refreshGameFiles()
 
 QString Launcher::builderPython() const
 {
+#ifndef _WIN32
+    return QStandardPaths::findExecutable("python3");
+#else
 	QString bundled = rootFile("builder/python/python.exe");
 	if (QFile::exists(bundled))
 		return bundled;
@@ -74,6 +77,7 @@ QString Launcher::builderPython() const
 	// that was not extracted whole) got "exit code 9009, see the log" instead of "the builder is missing" (2026-10-13)
 	const QString sys = QStandardPaths::findExecutable("python");
 	return sys.contains("WindowsApps", Qt::CaseInsensitive) ? QString() : sys;
+#endif
 }
 
 void Launcher::chooseCopy()
@@ -138,11 +142,27 @@ void Launcher::runBuilder(const QStringList& args)
 		m_builder->deleteLater();
 	m_builder = new QProcess(this);
 	m_builder->setWorkingDirectory(root());
+#ifndef _WIN32
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("T6_HOME", root());
+    m_builder->setProcessEnvironment(env);
+#endif
 	m_builder->setProcessChannelMode(QProcess::MergedChannels);
 	m_builder->setProgram(builderPython());
-	m_builder->setArguments(QStringList{"-u", "-X", "utf8", QDir::toNativeSeparators(rootFile("builder/build_native.py"))} + args);
+	m_builder->setArguments(QStringList{"-u", "-X", "utf8", QDir::toNativeSeparators(rootFile(
+#ifdef _WIN32
+"builder/build_native.py"
+#else
+"builder/build_linux.py"
+#endif
+))} + args);
 	// no console window of Python
+
+#ifdef _WIN32
 	m_builder->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* a) { a->flags |= CREATE_NO_WINDOW; });
+#else
+	prepareLinuxChild(m_builder);
+#endif
 	builderLog(QString("run %1 %2").arg(m_builder->program(), m_builder->arguments().join(' ')));
 	m_buildDone.clear();
 	connect(m_builder, &QProcess::readyRead, this, [this] {

@@ -49,17 +49,23 @@ Upnp upnpMap(int port)
 {
 	Upnp u;
 	u.port = port;
+#ifdef _WIN32
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa))
 	{
 		u.error = "no Winsock";
 		return u;
 	}
+#endif
 	QStringList locations;
 	SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s != INVALID_SOCKET)
 	{
+#ifdef _WIN32
 		DWORD wait = 500;
+#else
+        timeval wait{0, 500000};
+#endif
 		setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&wait), sizeof(wait));
 		sockaddr_in to{};
 		to.sin_family = AF_INET;
@@ -72,10 +78,10 @@ Upnp upnpMap(int port)
 			sendto(s, m.constData(), int(m.size()), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
 		}
 		char buf[2048];
-		for (const ULONGLONG until = GetTickCount64() + 3000; GetTickCount64() < until;)
+		for (const qint64 until = QDeadlineTimer::current().deadline() + 3000; QDeadlineTimer::current().deadline() < until;)
 		{
 			sockaddr_in from{};
-			int fromLen = sizeof(from);
+			SocketLength fromLen = sizeof(from);
 			const int n = recvfrom(s, buf, sizeof(buf), 0, reinterpret_cast<sockaddr*>(&from), &fromLen);
 			if (n <= 0)
 			{
@@ -144,7 +150,7 @@ Upnp upnpMap(int port)
 			if (SOCKET t2 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); t2 != INVALID_SOCKET)
 			{
 				sockaddr_in me{};
-				int len = sizeof(me);
+				SocketLength len = sizeof(me);
 				char ip[64]{};
 				if (!connect(t2, reinterpret_cast<const sockaddr*>(&g), sizeof(g)) && !getsockname(t2, reinterpret_cast<sockaddr*>(&me), &len))
 					inet_ntop(AF_INET, &me.sin_addr, ip, sizeof(ip));
@@ -169,7 +175,9 @@ Upnp upnpMap(int port)
 		if (!u.mapped && u.error.contains("error 725"))
 			u.mapped = upnpAdd(u, 0);
 	}
+#ifdef _WIN32
 	WSACleanup();
+#endif
 	return u;
 }
 

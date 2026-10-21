@@ -11,8 +11,12 @@
 void T6FrameHook(PPCRegister& r3) {
   T6SpikeFrameEnd();
   if (static const bool prof = T6Env("T6_PROFILE") != nullptr; prof && !g_prof_main.load()) {
+#ifdef _WIN32
     HANDLE h = nullptr;
     DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &h, THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, 0);
+#else
+    HANDLE h = t6np::T6LinuxProfileTarget();
+#endif
     g_prof_main.store(h);
     std::thread(ProfileThread).detach();
   }

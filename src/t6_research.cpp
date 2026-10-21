@@ -15,6 +15,7 @@ uint32_t CwGuestFunc(uintptr_t rip) {
   return it == g_cw.funcs.begin() ? 0 : std::prev(it)->second;
 }
 
+#ifdef _WIN32
 LONG WINAPI CwHandler(EXCEPTION_POINTERS* ep) {
   const DWORD code = ep->ExceptionRecord->ExceptionCode;
   if (code == EXCEPTION_SINGLE_STEP && t_cw_rearm) {
@@ -52,6 +53,11 @@ LONG WINAPI CwHandler(EXCEPTION_POINTERS* ep) {
   return EXCEPTION_CONTINUE_EXECUTION;
 }
 
+#else
+void T6LinuxWatchStart();
+void T6LinuxWatchStop();
+#endif
+
 void CwStart(uint8_t* base, uint32_t rec, uint32_t len) {
   if (g_cw.lo || !rec) return;  // the first battle record only
   g_cw.len = len;
@@ -62,7 +68,11 @@ void CwStart(uint8_t* base, uint32_t rec, uint32_t len) {
   g_cw.guest = rec;
   g_cw.lo = reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(g_cw.rec) & ~uintptr_t(0xFFF));
   g_cw.hi = reinterpret_cast<uint8_t*>((reinterpret_cast<uintptr_t>(g_cw.rec + len) + 0xFFF) & ~uintptr_t(0xFFF));
+#ifdef _WIN32
   AddVectoredExceptionHandler(1, CwHandler);
+#else
+  T6LinuxWatchStart();
+#endif
   DWORD old;
   VirtualProtect(g_cw.lo, g_cw.hi - g_cw.lo, PAGE_NOACCESS, &old);
   REXLOG_INFO("T6 custom watch: record {:08X} watched ({} host functions)", rec, g_cw.funcs.size());
@@ -72,6 +82,9 @@ void CwStop() {
   if (!g_cw.lo) return;
   DWORD old;
   VirtualProtect(g_cw.lo, g_cw.hi - g_cw.lo, PAGE_READWRITE, &old);
+#ifndef _WIN32
+  T6LinuxWatchStop();
+#endif
   g_cw.lo = g_cw.hi = nullptr;
   REXLOG_INFO("T6 custom watch: stopped");
 }

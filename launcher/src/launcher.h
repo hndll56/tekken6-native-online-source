@@ -269,8 +269,10 @@ private:
 
 	void showGameWindows(bool show);
 
+#ifdef _WIN32
 	static void makeFullscreen(HWND w);
-	static void showWindowsOf(DWORD gamePid, bool show, bool fullscreen);
+#endif
+	static void showWindowsOf(quint32 gamePid, bool show, bool fullscreen);
 
 	void gameReady();
 

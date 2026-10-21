@@ -5,6 +5,21 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(CTest)
+option(T6_BUILD_GAME "Build the recompiled game (requires your own game data and SDK)" ON)
+option(T6_BUILD_LAUNCHER "Build the Qt launcher" OFF)
+include(cmake/ggpo.cmake)
+add_subdirectory(tools/xdvdfs)
+if(T6_BUILD_LAUNCHER)
+    add_subdirectory(launcher)
+endif()
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+if(NOT T6_BUILD_GAME)
+    return()
+endif()
+
 set(REXSDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/rexglue-sdk"
     CACHE PATH "Pinned RexGlue SDK source tree")
 
@@ -13,7 +28,6 @@ set(REXSDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/rexglue-sdk"
 include(generated/rexglue.cmake)
 
 # Small ISO inspection/extraction utility; game data remains local to the user.
-add_subdirectory(tools/xdvdfs)
 
 if(MINGW AND TARGET rexgpu-xenos)
     # The plugin loader expects rexgpu-xenosrd.dll on Windows. MinGW's
@@ -43,17 +57,6 @@ if(MINGW AND TARGET rexruntime)
     target_link_options(rexruntime PRIVATE -Wl,--export-all-symbols)
 endif()
 
-# GGPO (MIT, third_party/ggpo: the fork of the PS3 rollback, prediction 3 frames; inputs = XINPUT_GAMEPAD)
-file(GLOB GGPO_SOURCES CONFIGURE_DEPENDS
-    third_party/ggpo/src/lib/ggpo/*.cpp
-    third_party/ggpo/src/lib/ggpo/backends/*.cpp
-    third_party/ggpo/src/lib/ggpo/network/*.cpp)
-add_library(ggpo STATIC ${GGPO_SOURCES})
-target_include_directories(ggpo PUBLIC third_party/ggpo/src/include PRIVATE third_party/ggpo/src/lib/ggpo)
-target_compile_definitions(ggpo PRIVATE _WINDOWS _WINSOCK_DEPRECATED_NO_WARNINGS _CRT_SECURE_NO_WARNINGS NOMINMAX)
-target_compile_options(ggpo PRIVATE -w)
-target_link_libraries(ggpo PUBLIC ws2_32 winmm)
-
 add_executable(tekken6 src/main.cpp src/tekken6_app.cpp
     src/t6_netplay.cpp
     src/t6_net_state.cpp
@@ -80,6 +83,10 @@ add_executable(tekken6 src/main.cpp src/tekken6_app.cpp
     src/t6_watch.cpp src/t6_match_setup.cpp src/t6_research.cpp src/t6_customize.cpp src/t6_name_plates.cpp
     src/t6_status.cpp src/t6_resolution.cpp)
 target_link_libraries(tekken6 PRIVATE ggpo)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(tekken6 PRIVATE src/t6_host_linux.cpp src/t6_input_linux.cpp src/t6_profile_linux.cpp src/t6_fault_linux.cpp src/t6_research_linux.cpp)
+    target_link_libraries(tekken6 PRIVATE ${CMAKE_DL_LIBS} SDL3::SDL3)
+endif()
 target_compile_options(tekken6 PRIVATE -mssse3)
 if(MINGW)
     # The SDK's SDL entry point is wWinMain; select the Unicode MinGW CRT

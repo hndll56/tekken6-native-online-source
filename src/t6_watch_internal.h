@@ -1,5 +1,6 @@
 // Tekken 6 game hooks - declarations shared by the modules split out of t6_watch.cpp
 #pragma once
+#include "t6_host.h"
 
 #include "t6_common.h"
 #include <rex/ppc/context.h>
@@ -9,7 +10,6 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <windows.h>
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>

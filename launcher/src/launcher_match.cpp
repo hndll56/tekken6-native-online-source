@@ -39,8 +39,12 @@ void Launcher::startMatch(const QJsonObject& m)
 		playMatchSound();
 		if (!isActiveWindow())
 		{
+#ifdef _WIN32
 			FLASHWINFO fw{sizeof(FLASHWINFO), reinterpret_cast<HWND>(winId()), FLASHW_TRAY | FLASHW_TIMERNOFG, 0, 0};
 			FlashWindowEx(&fw);
+#else
+            QApplication::alert(this);
+#endif
 		}
 	}
 	m_match = m;

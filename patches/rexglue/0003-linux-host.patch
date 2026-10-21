@@ -1,0 +1,554 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9b3cdf5..488a0e3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -223,9 +223,10 @@ configure_file(
+ )
+ 
+ # Output directories (multi-config appends /<Config>/ automatically)
+-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${REXGLUE_ROOT}/out/${REX_PLATFORM}")
+-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${REXGLUE_ROOT}/out/${REX_PLATFORM}")
+-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${REXGLUE_ROOT}/out/${REX_PLATFORM}")
++set(REXGLUE_OUTPUT_BASE "${REXGLUE_ROOT}/out" CACHE PATH "Base directory for native SDK outputs")
++set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${REXGLUE_OUTPUT_BASE}/${REX_PLATFORM}")
++set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${REXGLUE_OUTPUT_BASE}/${REX_PLATFORM}")
++set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${REXGLUE_OUTPUT_BASE}/${REX_PLATFORM}")
+ 
+ # Sanitizer support for debugging memory corruption and undefined behavior
+ if(REXGLUE_ENABLE_SANITIZERS)
+diff --git a/include/rex/input/mmjoystick/sdl_joystick_compat.h b/include/rex/input/mmjoystick/sdl_joystick_compat.h
+new file mode 100644
+index 0000000..4779c9e
+--- /dev/null
++++ b/include/rex/input/mmjoystick/sdl_joystick_compat.h
+@@ -0,0 +1,43 @@
++#pragma once
++// Read the existing raw joystick binding format through SDL3 on Linux.
++#include <SDL3/SDL.h>
++#include <cstdint>
++#include <cstring>
++#include <chrono>
++#include <thread>
++using UINT=unsigned;
++using DWORD=uint32_t;
++constexpr UINT JOYERR_NOERROR=0, JOY_RETURNALL=0xff, JOY_RETURNBUTTONS=0x80, JOY_RETURNPOV=0x40;
++constexpr DWORD JOY_POVCENTERED=0xffff, JOYCAPS_HASPOV=1;
++struct JOYINFOEX { DWORD dwSize{},dwFlags{},dwXpos{},dwYpos{},dwZpos{},dwRpos{},dwUpos{},dwVpos{},dwButtons{},dwPOV{JOY_POVCENTERED}; };
++using LPJOYINFOEX=JOYINFOEX*;
++struct JOYCAPSW { char szPname[256]{}; DWORD wXmin{},wXmax{65535},wYmin{},wYmax{65535},wZmin{},wZmax{65535},wRmin{},wRmax{65535},wUmin{},wUmax{65535},wVmin{},wVmax{65535},wNumButtons{},wNumAxes{},wCaps{}; };
++inline SDL_Joystick* T6RawJoystick(unsigned index) {
++    static bool ready=SDL_InitSubSystem(SDL_INIT_JOYSTICK);
++    if(!ready) return nullptr;
++    int count=0; auto* ids=SDL_GetJoysticks(&count);
++    SDL_Joystick* joy=index<unsigned(count) ? SDL_OpenJoystick(ids[index]) : nullptr;
++    SDL_free(ids); return joy;
++}
++inline UINT joyGetPosEx(unsigned index,JOYINFOEX* info) {
++    auto* joy=T6RawJoystick(index); if(!joy) return 1;
++    DWORD* axes[]={&info->dwXpos,&info->dwYpos,&info->dwZpos,&info->dwRpos,&info->dwUpos,&info->dwVpos};
++    for(int i=0;i<6;++i) *axes[i]=i<SDL_GetNumJoystickAxes(joy)?int(SDL_GetJoystickAxis(joy,i))+32768:32768;
++    info->dwButtons=0;
++    for(int i=0;i<SDL_GetNumJoystickButtons(joy) && i<32;++i) if(SDL_GetJoystickButton(joy,i)) info->dwButtons|=1u<<i;
++    switch(SDL_GetJoystickHat(joy,0)) {
++    case SDL_HAT_UP:info->dwPOV=0;break;case SDL_HAT_RIGHTUP:info->dwPOV=4500;break;
++    case SDL_HAT_RIGHT:info->dwPOV=9000;break;case SDL_HAT_RIGHTDOWN:info->dwPOV=13500;break;
++    case SDL_HAT_DOWN:info->dwPOV=18000;break;case SDL_HAT_LEFTDOWN:info->dwPOV=22500;break;
++    case SDL_HAT_LEFT:info->dwPOV=27000;break;case SDL_HAT_LEFTUP:info->dwPOV=31500;break;
++    default:info->dwPOV=JOY_POVCENTERED;
++    }
++    SDL_CloseJoystick(joy); return 0;
++}
++inline UINT joyGetDevCapsW(unsigned index,JOYCAPSW* caps,unsigned) {
++    auto* joy=T6RawJoystick(index); if(!joy) return 1;
++    const char* name=SDL_GetJoystickName(joy); if(name) std::strncpy(caps->szPname,name,255);
++    caps->wNumButtons=SDL_GetNumJoystickButtons(joy); caps->wNumAxes=SDL_GetNumJoystickAxes(joy);
++    caps->wCaps=SDL_GetNumJoystickHats(joy)>0?JOYCAPS_HASPOV:0;
++    SDL_CloseJoystick(joy); return 0;
++}
+diff --git a/include/rex/t6_port.h b/include/rex/t6_port.h
+new file mode 100644
+index 0000000..a31c208
+--- /dev/null
++++ b/include/rex/t6_port.h
+@@ -0,0 +1,10 @@
++#pragma once
++#ifdef _WIN32
++#define T6_SDK_EXPORT __declspec(dllexport)
++#else
++#define T6_SDK_EXPORT __attribute__((visibility("default")))
++#include <chrono>
++struct LARGE_INTEGER { long long QuadPart; };
++inline void QueryPerformanceCounter(LARGE_INTEGER* n) { n->QuadPart=std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
++inline void QueryPerformanceFrequency(LARGE_INTEGER* n) { n->QuadPart=1000000000; }
++#endif
+diff --git a/include/rex/thread.h b/include/rex/thread.h
+index 30b207d..917cbef 100644
+--- a/include/rex/thread.h
++++ b/include/rex/thread.h
+@@ -201,6 +201,7 @@ class WaitHandle {
+   // Returns the native handle of the object on the host system.
+   // This value is platform specific.
+   virtual void* native_handle() const = 0;
++  virtual int SemaphoreCount() { return -1; }
+ 
+  protected:
+   WaitHandle() = default;
+diff --git a/src/audio/audio_system.cpp b/src/audio/audio_system.cpp
+index 7050562..1184c97 100644
+--- a/src/audio/audio_system.cpp
++++ b/src/audio/audio_system.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -426,7 +427,7 @@ void AudioSystem::Resume() {
+ }  // namespace rex::audio
+ 
+ // Netplay audio lockstep (see g_audio_lockstep): on = 1 starts it (budget = callbacks done so far), 0 stops it
+-extern "C" __declspec(dllexport) void rex_audio_lockstep(int on) {
++extern "C" T6_SDK_EXPORT void rex_audio_lockstep(int on) {
+   {
+     std::lock_guard lock(rex::audio::g_audio_mutex);
+     rex::audio::g_audio_budget = rex::audio::g_audio_done.load();
+@@ -437,9 +438,9 @@ extern "C" __declspec(dllexport) void rex_audio_lockstep(int on) {
+   rex::audio::g_audio_cv.notify_all();
+ }
+ // Sampler: the worker's guest context while it runs a guest callback, else nullptr
+-extern "C" __declspec(dllexport) void* rex_audio_callback_context() { return rex::audio::g_audio_cb_ctx.load(std::memory_order_relaxed); }
++extern "C" T6_SDK_EXPORT void* rex_audio_callback_context() { return rex::audio::g_audio_cb_ctx.load(std::memory_order_relaxed); }
+ // Allows n more audio callbacks and waits until they ran (1) or timeout_ms passed (0)
+-extern "C" __declspec(dllexport) int rex_audio_advance(uint32_t n, int timeout_ms) {
++extern "C" T6_SDK_EXPORT int rex_audio_advance(uint32_t n, int timeout_ms) {
+   std::unique_lock lock(rex::audio::g_audio_mutex);
+   rex::audio::g_audio_budget += n;
+   rex::audio::g_audio_cv.notify_all();
+@@ -451,7 +452,7 @@ extern "C" __declspec(dllexport) int rex_audio_advance(uint32_t n, int timeout_m
+ // Netplay: the guest audio callback reads the time base once per call; in the lockstep the game gives that thread a
+ // time derived from the callback number instead of the host clock. Returns 1 and the callback number since the
+ // lockstep start when the calling thread is the audio worker in the lockstep, else 0.
+-extern "C" __declspec(dllexport) int rex_audio_worker_callback(uint64_t* index) {
++extern "C" T6_SDK_EXPORT int rex_audio_worker_callback(uint64_t* index) {
+   if (!rex::audio::g_audio_lockstep || rex::thread::current_thread_system_id() != rex::audio::g_audio_worker_tid) return 0;
+   *index = rex::audio::g_audio_done - rex::audio::g_audio_lock_base;
+   return 1;
+diff --git a/src/audio/sdl/sdl_audio_driver.cpp b/src/audio/sdl/sdl_audio_driver.cpp
+index dd9f0ce..54aa198 100644
+--- a/src/audio/sdl/sdl_audio_driver.cpp
++++ b/src/audio/sdl/sdl_audio_driver.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -175,11 +176,11 @@ std::atomic<bool> g_t6_audio_fast{false};
+ std::atomic<int> g_t6_audio_delay{0};
+ std::unordered_set<float*> g_t6_no_release;  // guarded by frames_mutex_
+ }  // namespace rex::audio::sdl
+-extern "C" __declspec(dllexport) void rex_audio_fast(int on) { rex::audio::sdl::g_t6_audio_fast = on != 0; }
+-extern "C" __declspec(dllexport) void rex_audio_delay(int frames) { rex::audio::sdl::g_t6_audio_delay += frames; }
++extern "C" T6_SDK_EXPORT void rex_audio_fast(int on) { rex::audio::sdl::g_t6_audio_fast = on != 0; }
++extern "C" T6_SDK_EXPORT void rex_audio_delay(int frames) { rex::audio::sdl::g_t6_audio_delay += frames; }
+ // Netplay pacing: frames queued for the device (8 at most; the device takes them in bursts of ~2 every ~10.7 ms)
+ std::atomic<int> g_t6_audio_queued{0};
+-extern "C" __declspec(dllexport) int rex_audio_queued() { return g_t6_audio_queued.load(); }
++extern "C" T6_SDK_EXPORT int rex_audio_queued() { return g_t6_audio_queued.load(); }
+ namespace rex::audio::sdl {
+ 
+ void SDLAudioDriver::SubmitFrame(uint32_t frame_ptr) {
+diff --git a/src/audio/xma_context.cpp b/src/audio/xma_context.cpp
+index 7f94941..cd853a6 100644
+--- a/src/audio/xma_context.cpp
++++ b/src/audio/xma_context.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+ ******************************************************************************
+ * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -41,9 +42,7 @@ extern "C" {
+ // The game asks with rex_audio_xma_errors() and restarts instead of parking after such a match.
+ #include <atomic>
+ static std::atomic<unsigned> t6_xma_errors{0};
+-#if defined(_WIN32)
+-extern "C" __declspec(dllexport) unsigned rex_audio_xma_errors() { return t6_xma_errors.load(std::memory_order_relaxed); }
+-#endif
++extern "C" T6_SDK_EXPORT unsigned rex_audio_xma_errors() { return t6_xma_errors.load(std::memory_order_relaxed); }
+ 
+ namespace rex::audio {
+ 
+diff --git a/src/audio/xma_decoder.cpp b/src/audio/xma_decoder.cpp
+index 5acaceb..f34efc9 100644
+--- a/src/audio/xma_decoder.cpp
++++ b/src/audio/xma_decoder.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -399,7 +400,7 @@ void XmaDecoder::Resume() {
+ 
+ }  // namespace rex::audio
+ 
+-extern "C" __declspec(dllexport) void rex_xma_stats(uint64_t* ns, uint64_t* n) {
++extern "C" T6_SDK_EXPORT void rex_xma_stats(uint64_t* ns, uint64_t* n) {
+   *ns = rex::audio::g_t6_xma_ns.load();
+   *n = rex::audio::g_t6_xma_n.load();
+ }
+diff --git a/src/core/logging.cpp b/src/core/logging.cpp
+index 55ddb6c..1bf95e8 100644
+--- a/src/core/logging.cpp
++++ b/src/core/logging.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  * @file        core/logging.cpp
+  * @brief       Logging infrastructure implementation
+@@ -565,7 +566,7 @@ std::map<std::string, std::string> ParseCategoryLevelsFromConfig(
+ 
+ // Netplay diagnostics (tekken6-x360 src/t6_netplay.cpp): switch every category to trace and the noisy import traces on
+ // at run time, e.g. right after a rollback restore, without logging the whole session at trace level
+-extern "C" __declspec(dllexport) void rex_trace_everything(bool on) {
++extern "C" T6_SDK_EXPORT void rex_trace_everything(bool on) {
+   REXCVAR_SET(log_noisy, on);
+   rex::SetAllLevels(on ? spdlog::level::trace : spdlog::level::info);
+ }
+diff --git a/src/core/threading_posix.cpp b/src/core/threading_posix.cpp
+index af4fcad..7844440 100644
+--- a/src/core/threading_posix.cpp
++++ b/src/core/threading_posix.cpp
+@@ -511,6 +511,7 @@ class PosixCondition<Semaphore> : public PosixConditionBase {
+       : count_(initial_count), maximum_count_(maximum_count) {}
+ 
+   bool Signal() override { return Release(1, nullptr); }
++  int Count() { std::lock_guard<std::mutex> lock(mutex_); return static_cast<int>(count_); }
+ 
+   bool Release(uint32_t release_count, int* out_previous_count) {
+     auto lock = std::unique_lock<std::mutex>(mutex_);
+@@ -1343,6 +1344,7 @@ class PosixSemaphore : public PosixConditionHandle<Semaphore> {
+       : PosixConditionHandle(static_cast<uint32_t>(initial_count),
+                              static_cast<uint32_t>(maximum_count)) {}
+   ~PosixSemaphore() override = default;
++  int SemaphoreCount() override { return handle_.Count(); }
+   bool Release(int release_count, int* out_previous_count) override {
+     if (release_count < 1) {
+       return false;
+diff --git a/src/graphics/d3d12/command_processor.cpp b/src/graphics/d3d12/command_processor.cpp
+index 5b806cc..7168031 100644
+--- a/src/graphics/d3d12/command_processor.cpp
++++ b/src/graphics/d3d12/command_processor.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -1895,7 +1896,7 @@ void D3D12CommandProcessor::OnGammaRampPWLValueWritten() {
+ // tekken6-x360 diagnostics: guest swaps (= images handed to the host presenter) since the start, for the game's frame
+ // statistics (a player's overlay showed 120 "fps" with the game at 60 frames per second: frame generation)
+ static std::atomic<uint32_t> g_t6_swap_count{0};
+-extern "C" __declspec(dllexport) uint32_t rex_swap_count() { return g_t6_swap_count.load(std::memory_order_relaxed); }
++extern "C" T6_SDK_EXPORT uint32_t rex_swap_count() { return g_t6_swap_count.load(std::memory_order_relaxed); }
+ 
+ void D3D12CommandProcessor::IssueSwap(uint32_t frontbuffer_ptr, uint32_t frontbuffer_width,
+                                       uint32_t frontbuffer_height) {
+diff --git a/src/graphics/graphics_system.cpp b/src/graphics/graphics_system.cpp
+index f97b50a..695dee0 100644
+--- a/src/graphics/graphics_system.cpp
++++ b/src/graphics/graphics_system.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -67,8 +68,8 @@ namespace rex::graphics {
+ // https://stackoverflow.com/questions/17458803/amd-equivalent-to-nvoptimusenablement
+ #if REX_PLATFORM_WIN32
+ extern "C" {
+-__declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+-__declspec(dllexport) uint32_t AmdPowerXpressRequestHighPerformance = 1;
++T6_SDK_EXPORT uint32_t NvOptimusEnablement = 0x00000001;
++T6_SDK_EXPORT uint32_t AmdPowerXpressRequestHighPerformance = 1;
+ }  // extern "C"
+ #endif  // REX_PLATFORM_WIN32
+ 
+diff --git a/src/graphics/vulkan/command_processor.cpp b/src/graphics/vulkan/command_processor.cpp
+index db04e9b..593aeb2 100644
+--- a/src/graphics/vulkan/command_processor.cpp
++++ b/src/graphics/vulkan/command_processor.cpp
+@@ -2314,8 +2314,13 @@ void VulkanCommandProcessor::OnGammaRampPWLValueWritten() {
+   gamma_ramp_pwl_current_frame_ = UINT32_MAX;
+ }
+ 
++static std::atomic<uint32_t> g_t6_swap_count{0};
++#ifndef _WIN32
++extern "C" __attribute__((visibility("default"))) uint32_t rex_swap_count() { return g_t6_swap_count.load(std::memory_order_relaxed); }
++#endif
+ void VulkanCommandProcessor::IssueSwap(uint32_t frontbuffer_ptr, uint32_t frontbuffer_width,
+                                        uint32_t frontbuffer_height) {
++  g_t6_swap_count.fetch_add(1, std::memory_order_relaxed);
+   SCOPE_profile_cpu_f("gpu");
+   vertex_buffers_in_sync_[0] = 0;
+   vertex_buffers_in_sync_[1] = 0;
+diff --git a/src/graphics/vulkan/render_target_cache.cpp b/src/graphics/vulkan/render_target_cache.cpp
+index 58514ab..84d2bd2 100644
+--- a/src/graphics/vulkan/render_target_cache.cpp
++++ b/src/graphics/vulkan/render_target_cache.cpp
+@@ -206,7 +206,8 @@ bool VulkanRenderTargetCache::Initialize(uint32_t shared_memory_binding_count) {
+       device_properties.fragmentStoresAndAtomics && device_properties.sampleRateShading &&
+       device_properties.standardSampleLocations &&
+       shared_memory_binding_count < device_properties.maxPerStageDescriptorStorageBuffers;
+-  if (REXCVAR_GET(render_target_path_vulkan) == "fsi") {
++  if (REXCVAR_GET(render_target_path_vulkan) == "fsi" ||
++      (REXCVAR_GET(render_target_path_vulkan) == "auto" && fsi_path_supported)) {
+     path_ = Path::kPixelShaderInterlock;
+   } else {
+     path_ = Path::kHostRenderTargets;
+diff --git a/src/input/CMakeLists.txt b/src/input/CMakeLists.txt
+index 866207c..6e92d96 100644
+--- a/src/input/CMakeLists.txt
++++ b/src/input/CMakeLists.txt
+@@ -33,7 +33,7 @@ if(WIN32)
+     target_sources(rexinput PRIVATE sdl/sdl_input_driver.cpp xinput/xinput_input_driver.cpp mmjoystick/mmjoystick_input_driver.cpp)
+     target_link_libraries(rexinput PUBLIC winmm)
+ else()
+-    target_sources(rexinput PRIVATE sdl/sdl_input_driver.cpp)
++    target_sources(rexinput PRIVATE sdl/sdl_input_driver.cpp mmjoystick/mmjoystick_input_driver.cpp)
+ endif()
+ 
+ target_link_libraries(rexinput PUBLIC rexcore rexui SDL3::SDL3)
+diff --git a/src/input/input_system.cpp b/src/input/input_system.cpp
+index 2fa1216..1826e29 100644
+--- a/src/input/input_system.cpp
++++ b/src/input/input_system.cpp
+@@ -22,9 +22,7 @@
+ #include <rex/input/sdl/sdl_input_driver.h>
+ #include <rex/input/state_merge.h>
+ #include <rex/input/xinput/xinput_input_driver.h>
+-#if REX_PLATFORM_WIN32
+ #include <rex/input/mmjoystick/mmjoystick_input_driver.h>
+-#endif
+ #include <rex/logging.h>
+ 
+ REXCVAR_DEFINE_STRING(input_backend, "sdl", "Input", "Input backend: sdl, xinput, mmjoystick")
+@@ -328,7 +326,6 @@ std::unique_ptr<InputSystem> CreateDefaultInputSystem(bool tool_mode) {
+   auto input = std::make_unique<InputSystem>(nullptr);
+ 
+   if (!tool_mode) {
+-#if REX_PLATFORM_WIN32
+     // WinMM joystick (RPCS3's "MMJoystick"): for devices SDL maps wrongly, mapping in mmjoystick.ini
+     if (REXCVAR_GET(input_backend) == "mmjoystick") {
+       auto mm_driver = std::make_unique<mmjoystick::MMJoystickInputDriver>(nullptr, 0);
+@@ -336,6 +333,7 @@ std::unique_ptr<InputSystem> CreateDefaultInputSystem(bool tool_mode) {
+         input->AddDriver(std::move(mm_driver));
+       }
+     }
++#if REX_PLATFORM_WIN32
+     if (REXCVAR_GET(input_backend) == "xinput") {
+       auto xinput_driver = std::make_unique<xinput::XinputInputDriver>(nullptr, 0);
+       if (xinput_driver->Setup() == X_STATUS_SUCCESS) {
+diff --git a/src/input/mmjoystick/mmjoystick_input_driver.cpp b/src/input/mmjoystick/mmjoystick_input_driver.cpp
+index 4df8760..e569ba8 100644
+--- a/src/input/mmjoystick/mmjoystick_input_driver.cpp
++++ b/src/input/mmjoystick/mmjoystick_input_driver.cpp
+@@ -24,8 +24,13 @@
+ #include <rex/logging.h>
+ 
+ #define NOMINMAX
++#ifdef _WIN32
+ #include <windows.h>
+ #include <mmsystem.h>
++#else
++#include <rex/input/mmjoystick/sdl_joystick_compat.h>
++#include <unistd.h>
++#endif
+ 
+ REXCVAR_DEFINE_STRING(mmjoystick_config, "", "Input",
+                       "MMJoystick mapping file (default: mmjoystick.ini next to the executable)");
+@@ -134,9 +139,13 @@ bool ParseSource(const std::string& text, MMJoystickInputDriver::Source& out) {
+ std::filesystem::path ConfigPath() {
+   const std::string cv = REXCVAR_GET(mmjoystick_config);
+   if (!cv.empty()) return std::filesystem::path(cv);
++#ifdef _WIN32
+   wchar_t exe[MAX_PATH] = {};
+   GetModuleFileNameW(nullptr, exe, MAX_PATH);
+   return std::filesystem::path(exe).parent_path() / "mmjoystick.ini";
++#else
++  return std::filesystem::current_path() / "mmjoystick.ini";
++#endif
+ }
+ 
+ // Axis deflection 0..1 in the bound direction, from the raw WinMM position and the device range
+@@ -181,7 +190,7 @@ void MMJoystickInputDriver::PollLoop() {
+       prev_buttons = info.dwButtons;
+       if (info.dwPOV != JOY_POVCENTERED) latched_pov_ = info.dwPOV;
+     }
+-    Sleep(1);
++    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+   }
+ }
+ 
+@@ -259,7 +268,11 @@ X_STATUS MMJoystickInputDriver::Setup() {
+   JOYCAPSW caps{};
+   if (joyGetDevCapsW(joy_id_, &caps, sizeof(caps)) == JOYERR_NOERROR) {
+     char name[64] = {};
++#ifdef _WIN32
+     WideCharToMultiByte(CP_UTF8, 0, caps.szPname, -1, name, sizeof(name) - 1, nullptr, nullptr);
++#else
++    std::strncpy(name,caps.szPname,sizeof(name)-1);
++#endif
+     device_name_ = name;
+     REXLOG_INFO("MMJoystick: device {} '{}', {} buttons, {} axes, POV {}", joy_id_ + 1, device_name_,
+                 caps.wNumButtons, caps.wNumAxes, (caps.wCaps & JOYCAPS_HASPOV) ? "yes" : "no");
+diff --git a/src/kernel/xboxkrnl/xboxkrnl_memory.cpp b/src/kernel/xboxkrnl/xboxkrnl_memory.cpp
+index 48463c2..67c370d 100644
+--- a/src/kernel/xboxkrnl/xboxkrnl_memory.cpp
++++ b/src/kernel/xboxkrnl/xboxkrnl_memory.cpp
+@@ -22,7 +22,9 @@
+ #include <string>
+ #include <rex/memory/utils.h>
+ #define NOMINMAX
++#ifdef _WIN32
+ #include <windows.h>
++#endif
+ #include <rex/math.h>
+ #include <rex/hook.h>
+ #include <rex/types.h>
+@@ -79,9 +81,15 @@ void LogAlloc(const char* what, uint32_t addr, uint32_t size) {
+   if (ctx) {
+     uint8_t* mb = REX_KERNEL_MEMORY()->virtual_membase();
+     auto readable = [](const void* p) {
++#ifdef _WIN32
+       MEMORY_BASIC_INFORMATION mbi{};
+       return VirtualQuery(p, &mbi, sizeof(mbi)) && mbi.State == MEM_COMMIT &&
+              !(mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD));
++#else
++      size_t length=0;
++      rex::memory::PageAccess access;
++      return rex::memory::QueryProtect(const_cast<void*>(p),length,access) && length>=4 && access!=rex::memory::PageAccess::kNoAccess;
++#endif
+     };
+     uint32_t sp = ctx->r1.u32;
+     for (int i = 0; i < 8 && sp; i++) {
+diff --git a/src/kernel/xboxkrnl/xboxkrnl_threading.cpp b/src/kernel/xboxkrnl/xboxkrnl_threading.cpp
+index c05e079..20c06b6 100644
+--- a/src/kernel/xboxkrnl/xboxkrnl_threading.cpp
++++ b/src/kernel/xboxkrnl/xboxkrnl_threading.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -1064,49 +1065,53 @@ namespace rex::kernel::xboxkrnl {
+ }  // namespace rex::kernel::xboxkrnl
+ // Netplay: guest context of the last thread that began a wait on a handle / object address, read by the save to see
+ // where a worker is (e.g. the net worker blocked on its GPU fence instead of its own wake event) and by the sampler
+-extern "C" __declspec(dllexport) void* rex_last_waiter_context(uint32_t handle) {
++extern "C" T6_SDK_EXPORT void* rex_last_waiter_context(uint32_t handle) {
+   auto* s = rex::kernel::xboxkrnl::T6WaitSlotOf(handle, false);
+   return s ? s->ctx.load(std::memory_order_relaxed) : nullptr;
+ }
+-extern "C" __declspec(dllexport) uint64_t rex_wait_entries(uint32_t address) {
++extern "C" T6_SDK_EXPORT uint64_t rex_wait_entries(uint32_t address) {
+   auto* s = rex::kernel::xboxkrnl::T6WaitSlotOf(address, false);
+   return s ? s->entries.load() : 0;
+ }
+-extern "C" __declspec(dllexport) int rex_waiters(uint32_t handle) {
++extern "C" T6_SDK_EXPORT int rex_waiters(uint32_t handle) {
+   auto* s = rex::kernel::xboxkrnl::T6WaitSlotOf(handle, false);
+   return s ? s->waiters.load() : 0;
+ }
+ // Netplay: current count of a guest semaphore (-1: not a semaphore). A save / load must not happen while a worker
+ // pool's semaphore holds a released but not yet taken count (the woken worker would take a job from a restored queue).
+-extern "C" __declspec(dllexport) int rex_semaphore_count(uint32_t handle) {
++extern "C" T6_SDK_EXPORT int rex_semaphore_count(uint32_t handle) {
+   using namespace rex; using namespace rex::system;
+   auto object = REX_KERNEL_OBJECTS()->LookupObject<XObject>(handle);
+   if (!object || object->type() != XObject::Type::Semaphore) return -1;
+   auto* wait = object->TraceWaitHandle();
+   if (!wait) return -1;
++#ifdef _WIN32
+   void* native = wait->native_handle();
+   struct Info { long current, maximum; } info{};
+   using QueryFn = long(__stdcall*)(void*, int, void*, unsigned long, unsigned long*);
+   static QueryFn query = reinterpret_cast<QueryFn>(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQuerySemaphore"));
+   if (!query || query(native, 0, &info, sizeof(info), nullptr) != 0) return -1;
+   return static_cast<int>(info.current);
++#else
++  return wait->SemaphoreCount();
++#endif
+ }
+ // Netplay: the global critical region (interrupt callbacks - the vblank callback - run guest code under it). Held
+ // across a save / load so no interrupt callback runs in the middle of the copy (with the guest vblank at 1 ms a
+ // callback ran during loads: the lock was then never released, pc4 / pc5 / pc6). lock=1 takes it, 0 releases it.
+-extern "C" __declspec(dllexport) void rex_global_lock(int lock) {
++extern "C" T6_SDK_EXPORT void rex_global_lock(int lock) {
+   if (lock) rex::thread::global_critical_region::mutex().lock();
+   else rex::thread::global_critical_region::mutex().unlock();
+ }
+ // Netplay: NtReleaseSemaphore calls so far and the time spent in them (QueryPerformanceCounter ticks), all threads
+-extern "C" __declspec(dllexport) void rex_sem_stats(uint64_t* calls, uint64_t* ticks) {
++extern "C" T6_SDK_EXPORT void rex_sem_stats(uint64_t* calls, uint64_t* ticks) {
+   *calls = rex::kernel::xboxkrnl::g_t6_sem_calls.load();
+   *ticks = rex::kernel::xboxkrnl::g_t6_sem_ticks.load();
+ }
+ // Netplay: hold a guest lock object (event / semaphore / mutant used as a lock) during a save/load so the thread that
+ // owns the protected queue cannot run (net_workerThread queue lock). hold=1 waits up to timeout_ms (1 = taken),
+ // hold=0 signals it again.
+-extern "C" __declspec(dllexport) int rex_hold_object(uint32_t handle, int hold, int timeout_ms) {
++extern "C" T6_SDK_EXPORT int rex_hold_object(uint32_t handle, int hold, int timeout_ms) {
+   using namespace rex; using namespace rex::system;
+   auto object = REX_KERNEL_OBJECTS()->LookupObject<XObject>(handle);
+   if (!object) return 0;
+diff --git a/src/system/function_dispatcher.cpp b/src/system/function_dispatcher.cpp
+index aeef205..543a469 100644
+--- a/src/system/function_dispatcher.cpp
++++ b/src/system/function_dispatcher.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  * @file        system/function_dispatcher.cpp
+  * @brief       Guest function dispatch coordinator for recompiled code
+@@ -411,7 +412,7 @@ std::optional<std::pair<uint32_t, uint32_t>> FunctionDispatcher::UnregisterModul
+ 
+ // Netplay: is an interrupt callback running (holding the global lock)? Returns the time it has been running in ms
+ // (-1: none) and its guest lr.
+-extern "C" __declspec(dllexport) long long rex_interrupt_info(uint32_t* lr) {
++extern "C" T6_SDK_EXPORT long long rex_interrupt_info(uint32_t* lr) {
+   auto* ts = rex::runtime::t6_irq_state.load();
+   if (!ts) return -1;
+   if (lr) *lr = static_cast<uint32_t>(ts->context()->lr);
+diff --git a/src/system/xobject.cpp b/src/system/xobject.cpp
+index b815c0f..1c19fb7 100644
+--- a/src/system/xobject.cpp
++++ b/src/system/xobject.cpp
+@@ -1,3 +1,4 @@
++#include <rex/t6_port.h>
+ /**
+  ******************************************************************************
+  * Xenia : Xbox 360 Emulator Research Project                                 *
+@@ -56,7 +57,7 @@ void RegisterLiveGuestObject(uint32_t guest_address, uint32_t size) {
+ }  // namespace rex::system
+ 
+ // Copies up to max_pairs (address, size) pairs to out, returns the total count
+-extern "C" __declspec(dllexport) uint32_t rex_live_guest_objects(uint32_t* out, uint32_t max_pairs) {
++extern "C" T6_SDK_EXPORT uint32_t rex_live_guest_objects(uint32_t* out, uint32_t max_pairs) {
+   std::lock_guard lock(rex::system::LiveMutex());
+   const auto& m = rex::system::LiveMap();
+   uint32_t n = 0;
+@@ -497,7 +498,7 @@ object_ref<XObject> XObject::GetNativeObject(KernelState* kernel_state, void* na
+ 
+ // Netplay diagnostics: the guest context of the calling host thread (nullptr if it runs no guest code)
+ #include <rex/system/thread_state.h>
+-extern "C" __declspec(dllexport) void* rex_current_guest_context() {
++extern "C" T6_SDK_EXPORT void* rex_current_guest_context() {
+   auto* ts = rex::runtime::ThreadState::Get();
+   return ts ? static_cast<void*>(ts->context()) : nullptr;
+ }
+@@ -506,7 +507,7 @@ extern "C" __declspec(dllexport) void* rex_current_guest_context() {
+ // a critical section). Returns the PPCContext* or nullptr; the name is copied into `name`.
+ #include <rex/system/kernel_state.h>
+ #include <rex/system/xthread.h>
+-extern "C" __declspec(dllexport) void* rex_thread_by_kthread(uint32_t kthread, char* name, uint32_t name_size) {
++extern "C" T6_SDK_EXPORT void* rex_thread_by_kthread(uint32_t kthread, char* name, uint32_t name_size) {
+   auto* ks = rex::system::kernel_state();
+   if (!ks) return nullptr;
+   for (auto& t : ks->object_table()->GetObjectsByType<rex::system::XThread>()) {

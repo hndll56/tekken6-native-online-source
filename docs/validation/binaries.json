@@ -1,0 +1,22 @@
+{
+  "build/components/launcher/t6-native-launcher": {
+    "sha256": "0f7aa558819457c543712cc93ce94deb9464017b15b832c0f6f914135cda2726",
+    "file": "ELF 64-bit LSB pie executable, x86-64, version 1 (GNU/Linux), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=72d70408d9c40a46d3d028272422eccedcc0c813, for GNU/Linux 3.2.0, not stripped"
+  },
+  "build/components/tools/xdvdfs/xdvdfs_tool": {
+    "sha256": "67a2db5cafe17c69e1804fceae0f6dd17c13656249de0eb53ac41f3d03e53c2c",
+    "file": "ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=b6e9d22defa9d02593bfebe6e4aab28516453ec9, for GNU/Linux 3.2.0, not stripped"
+  },
+  "third_party/rexglue-sdk/out/linux-amd64/rexglue": {
+    "sha256": "a497ee7e02ff354322751e785c07dcac11ae8aa5e862036a29a51a9f500835c1",
+    "file": "ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=17b07eb7be42137ca134e64a59026acad79a1438, for GNU/Linux 3.2.0, not stripped"
+  },
+  "third_party/rexglue-sdk/out/linux-amd64/librexruntime.so": {
+    "sha256": "391fa54def712fe6bb86e15dc7277069a64a72e14ca1f0d4b6c577faaf99653f",
+    "file": "ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=a81c29ee40563d847ad9dce29f6cd41537e4bfa7, not stripped"
+  },
+  "third_party/rexglue-sdk/out/linux-amd64/librexgpu-xenos.so": {
+    "sha256": "f001818c7e033d86d0da648d420ebff7963ca7b10807cdd403a050f0adcabd6a",
+    "file": "ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=5fa35c3b9543488c58f02143558c0b3dc5177cf7, not stripped"
+  }
+}

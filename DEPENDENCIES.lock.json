@@ -1,0 +1,14 @@
+{
+  "source_repository": "https://github.com/Ekspym/tekken6-native-online-source.git",
+  "source_revision": "e61f084be5d062c96389b8e8cb9fc4dc5fedaed4",
+  "sdk_repository": "https://github.com/rexglue/rexglue-sdk.git",
+  "sdk_revision": "f5337cdc947ff6d4c4196737e2c807a48f2a1fc2",
+  "sdk_patches": [
+    "patches/rexglue/0001-tekken6-sdk-changes.patch",
+    "patches/rexglue/0003-linux-host.patch"
+  ],
+  "ffmpeg_revision": "0604b464c7cb4ebc94940cf1f324a3b26b87717c",
+  "ffmpeg_patch": "patches/rexglue/0002-ffmpeg-mingw.patch",
+  "notes": "Every SDK dependency is pinned by that SDK revision's gitlinks. Distro compiler, Qt and system library versions must also match for identical binaries; matchmaking compares actual build hashes. This lock is a reproducible source recipe, not a bit-for-bit binary guarantee.",
+  "source_date_epoch": 1792349553
+}

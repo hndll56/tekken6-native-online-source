@@ -284,6 +284,7 @@ bool Launcher::padDown(PadKind kind)
 		return (QDateTime::currentMSecsSinceEpoch() / 1500) % 2 == 1;
 	if (kind != PadConfirm && qEnvironmentVariableIsSet("T6_TEST_PAD"))
 		return false;
+#ifdef _WIN32
 	// XInput, loaded at run time (no import: the launcher starts on a PC without it)
 	struct XState { DWORD packet; WORD buttons; BYTE lt, rt; SHORT lx, ly, rx, ry; };
 	using GetState = DWORD(WINAPI*)(DWORD, XState*);
@@ -304,6 +305,10 @@ bool Launcher::padDown(PadKind kind)
 			if (st.buttons & (kind == PadCancel ? 0x2000 : kind == PadStage ? 0x8000 : 0x1010))  // B / Y / A or START
 				return true;
 		}
+#else
+    if (settings().value("pad_backend", "mmjoystick").toString() == "sdl") return linuxGamepadDown(kind == PadCancel ? 1 : kind == PadStage ? 2 : 0);
+    const bool xpad = false;
+#endif
 	const bool mm = settings().value("pad_backend", "mmjoystick").toString() != "sdl";
 	const auto down = [](UINT dev, int button) {
 		JOYINFOEX ji{sizeof(ji), JOY_RETURNBUTTONS};

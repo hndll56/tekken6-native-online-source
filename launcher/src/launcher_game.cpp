@@ -67,6 +67,9 @@ QProcessEnvironment Launcher::gameEnvironment()
 // lookAndSound the motion blur / vibration / stage music options (not in the Customize session)
 void Launcher::addGameEnv(QProcessEnvironment& env, bool lookAndSound) const
 {
+#ifndef _WIN32
+    env.insert("T6_HOME",root());
+#endif
 	env.insert("T6_PAD_MAP", padMap());
 	env.insert("TEKKEN6_INTERNAL_RESOLUTION", m_render3d == 2 ? "640x360" : m_render3d == 1 ? "768x432" : "1024x576");
 	env.insert("TEKKEN6_OFFSCREEN_RESOLUTION", m_smallShadows ? "512x512" : "1024x1024");
@@ -88,11 +91,16 @@ QStringList Launcher::gameArgs(const QString& user, const QString& runDir) const
 {
 	return QStringList{"--game_data_root=" + QDir::toNativeSeparators(gameDataRoot()),
 	                   "--user_data_root=" + QDir::toNativeSeparators(user),
-	                   "--cache_root=" + QDir::toNativeSeparators(QDir(runDir).filePath("cache")),
+	                   "--cache_root=" + QDir::toNativeSeparators(gameCacheRoot(runDir)),
 	                   "--log_file=" + QDir::toNativeSeparators(QDir(runDir).filePath("tekken6.log")),
 	                   "--fullscreen=" + QString(m_fullscreen ? "true" : "false"), tearingArg(), "--async_shader_compilation=true", renderTargetArg(),
 	                   QString("--draw_resolution_scale_x=%1").arg(m_resScale), QString("--draw_resolution_scale_y=%1").arg(m_resScale),
-	                   "--d3d12_adapter=" + QString::number(gpuIndex())} + inputArgs();
+#ifdef _WIN32
+                       "--d3d12_adapter=" + QString::number(gpuIndex())
+#else
+                       "--vulkan_device=" + QString::number(gpuIndex())
+#endif
+    } + inputArgs();
 }
 
 void Launcher::prelaunch()
@@ -160,11 +168,15 @@ void Launcher::prelaunch()
 	if (g_leftoverGames)
 		appendGameLog(QString("ended %1 game process(es) left by an earlier launcher at start").arg(std::exchange(g_leftoverGames, 0)));
 	refreshGpu();
+#ifdef _WIN32
 	if (!showParked())
 		m_game->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* a) {
 			a->startupInfo->dwFlags |= STARTF_USESHOWWINDOW;
 			a->startupInfo->wShowWindow = SW_HIDE;
 		});
+#else
+		prepareLinuxChild(m_game);
+#endif
 	connect(m_game, &QProcess::finished, this, [this](int code) {
 		const bool inMatch = m_inMatch, failed = m_startFailed, oppGone = m_oppGone;
 		// into the game's own log (it goes with "Send the game's log"): a crash shows as "ended by itself" with its code
@@ -239,6 +251,7 @@ void Launcher::toFront()
 {
 	showNormal();
 	raise();
+#ifdef _WIN32
 	const HWND me = reinterpret_cast<HWND>(winId());
 	const HWND fg = GetForegroundWindow();
 	const DWORD fgThread = fg ? GetWindowThreadProcessId(fg, nullptr) : 0, myThread = GetCurrentThreadId();
@@ -247,6 +260,7 @@ void Launcher::toFront()
 	SetActiveWindow(me);
 	if (attach)
 		AttachThreadInput(myThread, fgThread, FALSE);
+#endif
 	activateWindow();
 }
 
@@ -254,11 +268,12 @@ void Launcher::toFront()
 void Launcher::showGameWindows(bool show)
 {
 	if (m_game && m_game->processId())
-		showWindowsOf(static_cast<DWORD>(m_game->processId()), show, m_fullscreen);
+		showWindowsOf(static_cast<quint32>(m_game->processId()), show, m_fullscreen);
 }
 
 // Fullscreen = borderless window over the whole monitor it is on, done here when the window shows (the SDK's own
 // --fullscreen did not take for a window started hidden)
+#ifdef _WIN32
 void Launcher::makeFullscreen(HWND w)
 {
 	const LONG_PTR style = GetWindowLongPtrW(w, GWL_STYLE);
@@ -273,7 +288,7 @@ void Launcher::makeFullscreen(HWND w)
 	SetWindowPos(w, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_FRAMECHANGED | SWP_NOOWNERZORDER);
 }
 
-void Launcher::showWindowsOf(DWORD gamePid, bool show, bool fullscreen)
+void Launcher::showWindowsOf(quint32 gamePid, bool show, bool fullscreen)
 {
 	struct Ctx { DWORD pid; bool show; bool full; } ctx{gamePid, show, fullscreen};
 	EnumWindows([](HWND w, LPARAM l) -> BOOL {
@@ -302,6 +317,15 @@ void Launcher::showWindowsOf(DWORD gamePid, bool show, bool fullscreen)
 		return TRUE;
 	}, reinterpret_cast<LPARAM>(&ctx));
 }
+
+#else
+void Launcher::showWindowsOf(quint32 pid, bool show, bool fullscreen) {
+    // A separate per-process file is safe on Wayland; the game handles its own SDL window on the UI thread.
+    QSaveFile f(rootFile(QString("runs/window_%1.txt").arg(pid)));
+    QDir().mkpath(QFileInfo(f.fileName()).absolutePath());
+    if (f.open(QIODevice::WriteOnly)) { f.write(show ? (fullscreen ? "fullscreen" : "show") : "hide"); f.commit(); }
+}
+#endif
 
 // the game stands at the hold point
 void Launcher::gameReady()
@@ -640,18 +664,30 @@ QString Launcher::tearingArg() const
 	// never (2.2.5): since the game presents at once from the guest output thread (no achievement toast dialog, input
 	// latency -1 frame) tearing would show as torn frames in Fullscreen; a full-screen flip model window without it
 	// still gets the display's independent flip, frames whole
-	return QString("--d3d12_allow_variable_refresh_rate_and_tearing=false");
+	#ifdef _WIN32
+    return QString("--d3d12_allow_variable_refresh_rate_and_tearing=false");
+#else
+    return QString("--vulkan_allow_present_mode_immediate=false");
+#endif
 }
 
 // Wine / Proton (vkd3d-proton): ROV needs VK_EXT_fragment_shader_interlock, which many Linux drivers lack, so
 // RTV there; real Windows keeps ROV (the shipped pipeline storage is ROV only). Not a supported platform.
 bool Launcher::underWine()
 {
+#ifdef _WIN32
 	static const bool wine = GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "wine_get_version") != nullptr;
 	return wine;
+#else
+    return false;
+#endif
 }
 
 QString Launcher::renderTargetArg()
 {
-	return QString("--render_target_path_d3d12=") + (underWine() ? "rtv" : "rov");
+	#ifdef _WIN32
+    return QString("--render_target_path_d3d12=") + (underWine() ? "rtv" : "rov");
+#else
+    return QString("--render_target_path_vulkan=auto");
+#endif
 }

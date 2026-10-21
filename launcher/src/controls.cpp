@@ -14,6 +14,7 @@ QString vkName(int vk)
 {
 	if (!vk)
 		return QString::fromUtf8("–");
+#ifdef _WIN32
 	UINT sc = MapVirtualKeyW(UINT(vk), MAPVK_VK_TO_VSC);
 	switch (vk)  // extended keys: the name of the gray block, not of the numpad
 	{
@@ -28,6 +29,14 @@ QString vkName(int vk)
 	if (GetKeyNameTextW(static_cast<LONG>(sc) << 16, name, 64) > 0)
 		return QString::fromWCharArray(name);
 	return QString("VK %1").arg(vk);
+#else
+    if ((vk >= 'A' && vk <= 'Z') || (vk >= '0' && vk <= '9') || vk==32) return QString(QChar(vk));
+    if(vk>=96 && vk<=105) return QString("Numpad %1").arg(vk-96);
+    if(vk>=112 && vk<=135) return QString("F%1").arg(vk-111);
+    static const QMap<int,QString> names{{8,"Backspace"},{9,"Tab"},{13,"Enter"},{16,"Shift"},{17,"Control"},{18,"Alt"},{20,"Caps Lock"},{27,"Escape"},{37,"Left"},{38,"Up"},{39,"Right"},{40,"Down"},
+        {186,";"},{187,"="},{188,","},{189,"-"},{190,"."},{191,"/"},{192,"`"},{219,"["},{220,"\\"},{221,"]"},{222,"'"}};
+    return names.value(vk, QString("Key %1").arg(vk));
+#endif
 }
 
 // T6_KEYMAP of the game for the Custom layout
@@ -97,7 +106,28 @@ bool KeyGrab::eventFilter(QObject*, QEvent* e)
 {
 	if (e->type() != QEvent::KeyPress || !m_done)
 		return false;
-	const int vk = int(static_cast<QKeyEvent*>(e)->nativeVirtualKey());
+	#ifdef _WIN32
+    const int vk = int(static_cast<QKeyEvent*>(e)->nativeVirtualKey());
+#else
+    auto* keyEvent = static_cast<QKeyEvent*>(e);
+    const int q = keyEvent->key();
+    static const QMap<int,int> special{{Qt::Key_Return,13},{Qt::Key_Enter,13},{Qt::Key_Backspace,8},{Qt::Key_Tab,9},
+        {Qt::Key_Escape,27},{Qt::Key_Left,37},{Qt::Key_Up,38},{Qt::Key_Right,39},{Qt::Key_Down,40},
+        {Qt::Key_Home,36},{Qt::Key_End,35},{Qt::Key_PageUp,33},{Qt::Key_PageDown,34},{Qt::Key_Insert,45},{Qt::Key_Delete,46},
+        {Qt::Key_Shift,16},{Qt::Key_Control,17},{Qt::Key_Alt,18},{Qt::Key_CapsLock,20},
+        {Qt::Key_Semicolon,186},{Qt::Key_Equal,187},{Qt::Key_Comma,188},{Qt::Key_Minus,189},{Qt::Key_Period,190},
+        {Qt::Key_Slash,191},{Qt::Key_QuoteLeft,192},{Qt::Key_BracketLeft,219},{Qt::Key_Backslash,220},{Qt::Key_BracketRight,221},{Qt::Key_Apostrophe,222}};
+    int vk=special.value(q, q>=32 && q<=126 ? q : 0);
+    if(q>=Qt::Key_F1 && q<=Qt::Key_F24) vk=112+q-Qt::Key_F1;
+    if(keyEvent->modifiers() & Qt::KeypadModifier) {
+        if(q>=Qt::Key_0 && q<=Qt::Key_9) vk=96+q-Qt::Key_0;
+        if(q==Qt::Key_Plus) vk=107;
+        if(q==Qt::Key_Minus) vk=109;
+        if(q==Qt::Key_Asterisk) vk=106;
+        if(q==Qt::Key_Slash) vk=111;
+        if(q==Qt::Key_Period) vk=110;
+    }
+#endif
 	auto done = std::move(m_done);
 	m_done = nullptr;
 	done(vk);

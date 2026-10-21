@@ -107,10 +107,15 @@ void Launcher::startCustomize()
 	m_customize->setProgram(gameExe());
 	m_customize->setArguments(gameArgs(user, runDir));
 	// hidden through the boot and the menus; shown when the character's Customize screen is there
+
+#ifdef _WIN32
 	m_customize->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* a) {
 		a->startupInfo->dwFlags |= STARTF_USESHOWWINDOW;
 		a->startupInfo->wShowWindow = SW_HIDE;
 	});
+#else
+	prepareLinuxChild(m_customize);
+#endif
 	m_customizeShown = false;
 	connect(m_customize, &QProcess::finished, this, [this](int code) {
 		if (!m_customize)
@@ -125,7 +130,7 @@ void Launcher::startCustomize()
 	connect(&m_customizePoll, &QTimer::timeout, this, [this] {
 		if (!m_customize || !m_customize->processId() || m_customizeShown)
 			return;
-		const DWORD pid = static_cast<DWORD>(m_customize->processId());
+		const quint32 pid = static_cast<quint32>(m_customize->processId());
 		QFile f(m_customizeOut + ".state");
 		const bool ready = f.open(QIODevice::ReadOnly) && f.readAll().startsWith("customize ready");
 		showWindowsOf(pid, ready, m_fullscreen);

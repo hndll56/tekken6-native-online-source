@@ -5,30 +5,48 @@
 // Root: the folder with build\tekken6.exe (project) or with tekken6.exe (package)
 QString root()
 {
+#ifndef _WIN32
+    const QString override = qEnvironmentVariable("T6_HOME");
+    const QString home = override.isEmpty() ? QDir(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)).filePath("tekken6-native-online") : QFileInfo(override).absoluteFilePath();
+    QDir().mkpath(home);
+    return home;
+#else
 	QDir d(QCoreApplication::applicationDirPath());
 	for (int i = 0; i < 3; i++)
 	{
-		if (QFile::exists(d.filePath("build/tekken6.exe")) || QFile::exists(d.filePath("tekken6.exe")) ||
+		if (QFile::exists(d.filePath(T6_BUILD_EXE)) || QFile::exists(d.filePath(T6_GAME_EXE)) ||
 		    QFile::exists(d.filePath("builder/build_native.py")))
 			return d.absolutePath();
 		if (!d.cdUp())
 			break;
 	}
 	return QCoreApplication::applicationDirPath();
+#endif
 }
 
 QString rootFile(const QString& rel)
 {
+#ifndef _WIN32
+    // Source assets/build tools can be in a read-only checkout; generated data always stays under root().
+    if (rel.startsWith("builder/") || rel.startsWith("tools/") || rel.startsWith("profile/") || rel.startsWith("user/")) {
+        const QString source = qEnvironmentVariable("T6_SOURCE_DIR", QCoreApplication::applicationDirPath());
+        for (QDir d(source);;) {
+            const QString candidate = d.filePath(rel);
+            if (QFileInfo::exists(candidate)) return candidate;
+            if (!d.cdUp()) break;
+        }
+    }
+#endif
 	return QDir(root()).filePath(rel);
 }
 
 // the game built from the player's copy (native\) first; build\ = development tree
 QString gameExe()
 {
-	for (const char* rel : {"native/tekken6.exe", "build/tekken6.exe", "tekken6.exe"})
+	for (const char* rel : {T6_NATIVE_EXE, T6_BUILD_EXE, T6_GAME_EXE})
 		if (QFile::exists(rootFile(rel)))
 			return rootFile(rel);
-	return rootFile("native/tekken6.exe");
+	return rootFile(T6_NATIVE_EXE);
 }
 
 QString gameDataRoot()
@@ -50,8 +68,8 @@ QString builderVersion()
 
 GameNeed gameNeed()
 {
-	if (!QFile::exists(rootFile("native/tekken6.exe")))
-		return QFile::exists(rootFile("build/tekken6.exe")) || QFile::exists(rootFile("tekken6.exe")) ? GameOk : GameBuild;
+	if (!QFile::exists(rootFile(T6_NATIVE_EXE)))
+		return QFile::exists(rootFile(T6_BUILD_EXE)) || QFile::exists(rootFile(T6_GAME_EXE)) ? GameOk : GameBuild;
 	const bool data = QFile::exists(rootFile("native/game/default.xex")) || QFile::exists(rootFile("native/game/Default.xex"));
 	const bool objs = QFile::exists(rootFile("native/obj/keys.json")) && QFile::exists(rootFile("native/objects.rsp"));
 	const QString v = builderVersion();
@@ -65,8 +83,14 @@ GameNeed gameNeed()
 
 QSettings settings()
 {
+#ifndef _WIN32
+    const QString config = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)).filePath("tekken6-native-online");
+    QDir().mkpath(config);
+    return QSettings(QDir(config).filePath(QString("launcher_%1.ini").arg(g_instance)), QSettings::IniFormat);
+#else
 	return QSettings(rootFile(g_instance == 1 ? "launcher_native.ini" : QString("launcher_native_%1.ini").arg(g_instance)),
 	                 QSettings::IniFormat);
+#endif
 }
 
 // reference profile of the package (development tree: the user/ folder the tests use)
@@ -99,7 +123,13 @@ QString buildHash()
 	};
 	const QString bin = QFileInfo(gameExe()).absolutePath();
 	add("exe", gameExe());
-	for (const char* dll : {"rexruntime.dll", "rexgpu-xenos.dll"})
+	for (const char* dll : {
+#ifdef _WIN32
+"rexruntime.dll", "rexgpu-xenos.dll"
+#else
+"librexruntime.so", "librexgpu-xenos.so"
+#endif
+})
 		add(dll, QDir(bin).filePath(dll));
 	add("menu", rootFile("tools/menu_vs.bin"));
 	add("exclude", rootFile("tools/netplay_exclude.txt"));
@@ -151,9 +181,13 @@ void addShaderCache(const QString& runDir)
 {
 	if (qEnvironmentVariableIsSet("T6_NO_SHADER_CACHE"))
 		return;
-	const QString to = QDir(runDir).filePath("cache/shaders/shareable");
+	const QString to = QDir(gameCacheRoot(runDir)).filePath("shaders/shareable");
 	const struct { const char* name; int header; int fixed; } files[] = {
-		{"4E4D07FC.xsh", 8, 0}, {"4E4D07FC.rov.d3d12.xpso", 12, 72}};
+		{"4E4D07FC.xsh", 8, 0}
+#ifdef _WIN32
+        , {"4E4D07FC.rov.d3d12.xpso", 12, 72}
+#endif
+};
 	for (const auto& f : files)
 	{
 		QFile sf(rootFile(QString("tools/shader_cache/") + f.name));
@@ -196,4 +230,13 @@ void addShaderCache(const QString& runDir)
 				out.write(r);
 		out.commit();
 	}
+}
+
+QString gameCacheRoot(const QString& runDir)
+{
+#ifdef _WIN32
+    return QDir(runDir).filePath("cache");
+#else
+    return QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)).filePath("tekken6-native-online/" + QFileInfo(runDir).fileName());
+#endif
 }

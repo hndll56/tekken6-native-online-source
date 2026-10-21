@@ -26,7 +26,7 @@ ServerAddr serverAddr()
 const QSslCertificate& pinnedCert()
 {
 	static const QSslCertificate cert = [] {
-		QFile f(":/tls/t6_cert.pem");
+		QFile f(qEnvironmentVariable("T6_LOBBY_CERT", ":/tls/t6_cert.pem"));
 		return f.open(QIODevice::ReadOnly) ? QSslCertificate(&f, QSsl::Pem) : QSslCertificate();
 	}();
 	return cert;

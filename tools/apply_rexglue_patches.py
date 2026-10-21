@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import os
+import tempfile
 import subprocess
 import sys
 from pathlib import Path
@@ -50,9 +52,48 @@ def main() -> int:
     if not (sdk / ".git").exists():
         print(f"ReXGlue SDK checkout not found: {sdk}", file=sys.stderr)
         return 2
-    for name, sub, base in PATCHES:
-        if not apply((sdk / sub).resolve(), patch_dir / name, base):
+    # The Linux patch is stacked on the original title patch. Compare the
+    # worktree against each known prefix using an isolated Git index so repeat
+    # invocations are safe even though the original patch's context changed.
+    series = [patch_dir / "0001-tekken6-sdk-changes.patch", patch_dir / "0003-linux-host.patch"]
+    base = PATCHES[0][2]
+    if git(sdk, "rev-parse", "HEAD").stdout.strip() != base:
+        print(f"Expected SDK revision {base}; refusing a different revision", file=sys.stderr)
+        return 2
+    with tempfile.TemporaryDirectory(prefix="t6-patch-") as temp:
+        env = {**os.environ, "GIT_INDEX_FILE": str(Path(temp) / "index")}
+        def indexed(*arguments: str):
+            return subprocess.run(["git", "-C", str(sdk), *arguments], env=env, text=True, capture_output=True)
+        result = indexed("read-tree", "HEAD")
+        if result.returncode:
+            print(result.stderr, file=sys.stderr)
             return 2
+        matching_prefix = None
+        for count in range(len(series) + 1):
+            if indexed("diff", "--quiet", "--ignore-submodules=dirty", "--").returncode == 0:
+                matching_prefix = count
+            if count < len(series):
+                patch = series[count]
+                if not patch.is_file():
+                    print(f"Missing patch: {patch}", file=sys.stderr)
+                    return 2
+                result = indexed("apply", "--cached", str(patch))
+                if result.returncode:
+                    print(result.stderr, file=sys.stderr)
+                    return 2
+        if matching_prefix is None:
+            print("SDK has changes outside the known patch series; refusing to overwrite them", file=sys.stderr)
+            return 2
+        for patch in series[matching_prefix:]:
+            # git apply checks every hunk before writing and rejects conflicts.
+            git(sdk, "apply", "--check", str(patch))
+            git(sdk, "apply", str(patch))
+            print(f"{patch.name}: applied")
+        if matching_prefix == len(series):
+            print("SDK patch series: already applied")
+    name, sub, base = PATCHES[1]
+    if not apply((sdk / sub).resolve(), patch_dir / name, base):
+        return 2
     return 0
 
 

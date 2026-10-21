@@ -18,3 +18,5 @@
 /launcher/build*/
 # Settings and logins of a local launcher
 *.ini
+__pycache__/
+*.py[cod]

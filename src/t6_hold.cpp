@@ -161,7 +161,7 @@ void T6NetHold() {
   if (const char* dir = T6Env("T6_NET_DUMP_DIR"); first && dir && *dir) {
     for (const auto& [from, to] : {std::pair{"hold_pages.txt", fmt::format("hold_pages_{:016X}.txt", state_hash)},
                                    std::pair{"hold_raw.bin", fmt::format("hold_raw_{:016X}.bin", state_hash)}}) {
-      CopyFileA(fmt::format("{}/{}", dir, from).c_str(), fmt::format("{}/{}", dir, to).c_str(), TRUE);  // (TRUE: never over an existing one)
+      CopyFileA(fmt::format("{}/{}", dir, from).c_str(), fmt::format("{}/{}", dir, to).c_str(), true);  // (true: never over an existing one)
     }
   }
   REXLOG_INFO("T6 net: hold point state hash {:016X}, heap hash {:016X}", state_hash, heap_hash);

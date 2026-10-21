@@ -4,6 +4,7 @@
 
 // ---- Host crash report with the guest registers (any access violation in generated code) ----
 namespace t6np {
+#ifdef _WIN32
 LONG WINAPI T6CrashHandler(EXCEPTION_POINTERS* ep) {
   if (ep->ExceptionRecord->ExceptionCode != EXCEPTION_ACCESS_VIOLATION) return EXCEPTION_CONTINUE_SEARCH;
   static std::atomic<int> once{0};
@@ -42,4 +43,5 @@ LONG WINAPI T6CrashHandler(EXCEPTION_POINTERS* ep) {
 struct T6CrashInstall {
   T6CrashInstall() { AddVectoredExceptionHandler(0, T6CrashHandler); }
 } g_t6_crash_install;
+#endif
 }  // namespace t6np

@@ -278,6 +278,10 @@ class Tekken6App final : public rex::ReXApp {
 
   std::atomic_bool capture_stop_{false};
   std::thread capture_thread_;
+#ifndef _WIN32
+  std::shared_ptr<std::atomic<bool>> linux_window_alive_ = std::make_shared<std::atomic<bool>>(true);
+  std::jthread linux_window_thread_;
+#endif
   std::unique_ptr<rex::ui::ImGuiDrawer> frame_data_drawer_;  // (declared first: destroyed after its dialog)
   std::unique_ptr<T6FrameDataDialog> frame_data_dialog_;
 };

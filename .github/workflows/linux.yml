@@ -1,0 +1,16 @@
+name: Linux components
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  components:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ python3 openssl qt6-base-dev qt6-multimedia-dev qt6-qpa-plugins libsdl2-dev libvulkan-dev
+      - run: cmake --preset linux-components
+      - run: cmake --build --preset linux-components
+      - run: ctest --preset linux-components
+        env:
+          QT_QPA_PLATFORM: offscreen

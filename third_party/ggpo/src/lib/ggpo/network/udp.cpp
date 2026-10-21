@@ -18,7 +18,9 @@ CreateSocket(uint16 bind_port, int retries)
 
    s = socket(AF_INET, SOCK_DGRAM, 0);
    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&optval, sizeof optval);
+#ifdef _WIN32
    setsockopt(s, SOL_SOCKET, SO_DONTLINGER, (const char *)&optval, sizeof optval);
+#endif
 
    // non-blocking...
    u_long iMode = 1;
@@ -70,7 +72,7 @@ Udp::SendTo(char *buffer, int len, int flags, struct sockaddr *dst, int destlen)
 
    int res = sendto(_socket, buffer, len, flags, dst, destlen);
    if (res == SOCKET_ERROR) {
-      DWORD err = WSAGetLastError();
+      int err = WSAGetLastError();
       Log("unknown error in sendto (erro: %d  wsaerr: %d).\n", res, err);
       ASSERT(FALSE && "Unknown error in sendto");
    }
@@ -83,7 +85,11 @@ Udp::OnLoopPoll(void *cookie)
 {
    uint8          recv_buf[MAX_UDP_PACKET_SIZE];
    sockaddr_in    recv_addr;
-   int            recv_addr_len;
+#ifdef _WIN32
+   int recv_addr_len;
+#else
+   socklen_t recv_addr_len;
+#endif
 
    for (;;) {
       recv_addr_len = sizeof(recv_addr);

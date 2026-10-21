@@ -1,0 +1,270 @@
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
